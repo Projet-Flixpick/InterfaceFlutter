@@ -31,9 +31,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   // Liste des pages avec Scaffold pour s'assurer que la barre de navigation est bien gérée
   final List<Widget> _screens = [
-    const TopsScreen(),
-    const RecommendationsScreen(),
-    const ProfileScreen(),
+    TopsScreen(),
+    RecommendationsScreen(),
+    ProfileScreen(),
   ];
 
   // Changer de page

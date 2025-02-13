@@ -22,3 +22,4 @@ flutter:
   assets:
     - assets/images/Logo_FlixPick.png
     - assets/images/icone_film.jpg
+    - lib/services/APINode/films_data.json
