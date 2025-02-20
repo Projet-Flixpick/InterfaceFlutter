@@ -1,26 +1,12 @@
+// home_screen.dart
 import 'package:flutter/material.dart';
+import '../widgets/bottom_nav_bar.dart';  // Importer la barre de navigation personnalisée
 import 'tops_screen.dart';
 import 'recommendations_screen.dart';
 import 'profile_screen.dart';
 
-void main() {
-  runApp(const MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: const HomeScreen(),
-    );
-  }
-}
-
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  const HomeScreen({Key? key}) : super(key: key);
 
   @override
   _HomeScreenState createState() => _HomeScreenState();
@@ -29,47 +15,33 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
 
-  // Liste des pages avec Scaffold pour s'assurer que la barre de navigation est bien gérée
+  // Liste des écrans (pages) à afficher
   final List<Widget> _screens = [
-    TopsScreen(),
-    RecommendationsScreen(),
-    ProfileScreen(),
+    Center(
+      child: const Text(
+        'Bienvenue sur l\'écran d\'accueil!',
+        style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+      ),
+    ),
+    const TopsScreen(),           // Page des Tops
+    const RecommendationsScreen(), // Page des recommandations
+    const ProfileScreen(),         // Page du Profil
   ];
 
-  // Changer de page
+  // Fonction pour changer de page en fonction de l'élément cliqué dans la barre de navigation
   void _onItemTapped(int index) {
     setState(() {
-      _selectedIndex = index;
+      _selectedIndex = index; // Mettre à jour l'index pour afficher l'écran correspondant
     });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: IndexedStack(
-        index: _selectedIndex,
-        children: _screens,
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedIndex,
-        onTap: _onItemTapped,
-        selectedItemColor: Colors.blue,  // Couleur de l'élément sélectionné
-        unselectedItemColor: Colors.grey, // Couleur des éléments non sélectionnés
-        showUnselectedLabels: true, // Afficher les labels même si pas sélectionné
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.trending_up),
-            label: "Tops",
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.recommend),
-            label: "Pour vous",
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: "Profil",
-          ),
-        ],
+      body: _screens[_selectedIndex], // Affiche l'écran correspondant à l'index sélectionné
+      bottomNavigationBar: BottomNavBar(
+        selectedIndex: _selectedIndex, // Passer l'index actuel à la barre de navigation
+        onItemTapped: _onItemTapped,   // Passer la fonction pour changer de page
       ),
     );
   }

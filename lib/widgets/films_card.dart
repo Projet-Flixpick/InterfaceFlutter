@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../screens/film_detail_screen.dart';
 import '../models/film_model.dart';
 
 class FilmsCard extends StatelessWidget {
@@ -8,42 +9,61 @@ class FilmsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        // Affichage de l'affiche du film
-        Image.network(
-          film.posterPath,
-          width: 100, // Largeur spécifique
-          height: 150, // Hauteur de l'image
-          fit: BoxFit.cover,
-        ),
-        const SizedBox(height: 5),
-        // Titre et année du film
-        SizedBox(
-          width: 100, // Pour s'aligner avec l'image
-          child: Column(
-            children: [
-              Text(
-                film.title,
-                style: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                ),
-                textAlign: TextAlign.center,
-                maxLines: 2, // Limite à 2 lignes le titre
-                overflow: TextOverflow.ellipsis, // Ajoute "..." si le texte est trop long
-              ),
-              Text(
-                // Modification de cette ligne pour éviter l'erreur RangeError
-                film.releaseDate.length >= 4 ? film.releaseDate.substring(0, 4) : 'Inconnue',
-                textAlign: TextAlign.center,
-              ),
-            ],
+    return GestureDetector(
+      onTap: () {
+        // Lorsque le film est cliqué, on navigue vers la page de détails
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => FilmDetailScreen(film: film),
           ),
+        );
+      },
+      child: Container(
+        margin: const EdgeInsets.symmetric(
+            horizontal: 8.0), // Ajouter de l'espace entre les films
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(10),
         ),
-        const SizedBox(height: 10),
-      ],
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            // Affiche l'affiche du film
+            Image.network(
+              film.posterPath,
+              width: 100,
+              height: 150,
+              fit: BoxFit.cover,
+            ),
+            const SizedBox(height: 5),
+            // Titre et année du film
+            SizedBox(
+              width: 100,
+              child: Column(
+                children: [
+                  Text(
+                    film.title,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    textAlign: TextAlign.center,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  Text(
+                    film.releaseDate.length >= 4
+                        ? film.releaseDate.substring(0, 4)
+                        : 'Inconnue',
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 10),
+          ],
+        ),
+      ),
     );
   }
 }

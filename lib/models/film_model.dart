@@ -18,7 +18,7 @@ class Film {
     required this.title,
     required this.overview,
     required this.releaseDate,
-    required this.posterPath,
+    required String posterPath, // Ne change rien ici
     required this.genres,
     required this.popularity,
     required this.voteAverage,
@@ -27,30 +27,33 @@ class Film {
     required this.isAdult,
     required this.backdropPath,
     required this.isVideo,
-  });
+  }) : posterPath = posterPath.isNotEmpty 
+        ? 'https://image.tmdb.org/t/p/w500$posterPath' 
+        : 'https://via.placeholder.com/100x150?text=No+Image'; // <-- Ajout d'un fallback
 
-  // Méthode pour créer un Film depuis un JSON
-  factory Film.fromJson(Map<String, dynamic> json) {
-    return Film(
-      id: json['id'] ?? 0, // Valeur par défaut si null
-      title: json['title'] ?? 'Titre inconnu', // Valeur par défaut si null
-      overview: json['overview'] ?? '', // Valeur par défaut si null
-      releaseDate: json['releaseDate'] ?? '', // Valeur par défaut si null
-      posterPath: json['posterPath'] ?? '', // Valeur par défaut si null
-      genres: (json['genres'] as List?)
-              ?.map((genreJson) => Genre.fromJson(genreJson))
-              .toList() ??
-          [], // Valeur par défaut si genres est null
-      popularity: (json['popularity'] as num?)?.toDouble() ?? 0.0, // Valeur par défaut si null
-      voteAverage: (json['voteAverage'] as num?)?.toDouble() ?? 0.0, // Valeur par défaut si null
-      voteCount: json['voteCount'] ?? 0, // Valeur par défaut si null
-      originalLanguage: json['originalLanguage'] ?? '', // Valeur par défaut si null
-      isAdult: json['isAdult'] ?? false, // Valeur par défaut si null
-      backdropPath: json['backdropPath'] ?? '', // Valeur par défaut si null
-      isVideo: json['isVideo'] ?? false, // Valeur par défaut si null
-    );
-  }
+
+factory Film.fromJson(Map<String, dynamic> json) {
+  return Film(
+    id: json['id'] ?? 0,
+    title: json['title'] ?? 'Titre inconnu',
+    overview: json['overview'] ?? '',
+    releaseDate: json['release_date'] ?? '0000-00-00',
+    posterPath: json['poster_path'] ?? '', // Ne pas ajouter l'URL ici
+    genres: (json['genres'] as List<dynamic>?)
+            ?.map((genre) => Genre.fromJson(genre))
+            .toList() ?? [],
+    popularity: (json['popularity'] as num?)?.toDouble() ?? 0.0,
+    voteAverage: (json['vote_average'] as num?)?.toDouble() ?? 0.0,
+    voteCount: json['vote_count'] ?? 0,
+    originalLanguage: json['original_language'] ?? '',
+    isAdult: json['adult'] ?? false,
+    backdropPath: json['backdrop_path'] ?? '',
+    isVideo: json['video'] ?? false,
+  );
 }
+
+}
+
 
 class Genre {
   final int id;

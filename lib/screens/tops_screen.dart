@@ -1,9 +1,7 @@
-// lib/screens/tops_screen.dart
-
 import 'package:flutter/material.dart';
 import '../models/film_model.dart';
-import '../services/film_loader.dart';  // Assure-toi d'importer la méthode depuis film_loader.dart
-import '../widgets/films_card.dart';
+import '../services/film_loader.dart';
+import '../widgets/films_list.dart';
 
 class TopsScreen extends StatefulWidget {
   const TopsScreen({super.key});
@@ -13,6 +11,29 @@ class TopsScreen extends StatefulWidget {
 }
 
 class _TopsScreenState extends State<TopsScreen> {
+  List<Film> films = [];
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadFilms();
+  }
+
+  Future<void> _loadFilms() async {
+    try {
+      List<Film> loadedFilms = await loadFilms();
+      setState(() {
+        films = loadedFilms;
+        isLoading = false;
+      });
+    } catch (e) {
+      print('Erreur lors du chargement des films : $e');
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -20,31 +41,48 @@ class _TopsScreenState extends State<TopsScreen> {
       appBar: AppBar(
         title: const Text('Top Films'),
       ),
-      body: FutureBuilder<List<Film>>(
-        future: loadFilms(), // Appelle la méthode loadFilms() importée
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
+      body: isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : ListView(
+              children: [
+                _buildFilmCategory(
+                    'Top des Films de la Semaine', films), // Films populaires
+                _buildFilmCategory(
+                    "Top des Films aujourd'hui", films), // Films de la semaine
+              ],
+            ),
+    );
+  }
 
-          if (snapshot.hasError) {
-            return const Center(child: Text('Erreur de chargement des films.'));
-          }
+  // Fonction pour afficher chaque catégorie de films avec un titre
+  Widget _buildFilmCategory(String categoryTitle, List<Film> films) {
+    // Ici, tu peux filtrer les films pour chaque catégorie
+    // Par exemple, si tu avais un champ 'category' dans ton modèle Film
+    List<Film> filteredFilms = films; // Remplace par un filtrage adapté
 
-          if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(child: Text('Aucun film trouvé.'));
-          }
-
-          // Si tout va bien, on a les films à afficher
-          List<Film> films = snapshot.data!;
-
-          return ListView.builder(
-            itemCount: films.length,
-            itemBuilder: (context, index) {
-              return FilmsCard(film: films[index]);
-            },
-          );
-        },
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Titre de la catégorie
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 15),
+            child: Text(
+              categoryTitle,
+              style: const TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          // Liste horizontale de films
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 10),
+            child: FilmsList(
+                films: filteredFilms), // FilmsList avec défilement horizontal
+          ),
+        ],
       ),
     );
   }
