@@ -7,11 +7,11 @@ Future<List<Film>> loadFilms() async {
     // Charge le fichier JSON à partir des assets
     String jsonString =
         await rootBundle.loadString('lib/services/APINode/films_data.json');
-    print('Fichier JSON chargé : $jsonString'); // Ajouter un log pour afficher le contenu du fichier JSON
+    // print('Fichier JSON chargé : $jsonString'); // Ajouter un log pour afficher le contenu du fichier JSON
 
     // Convertit la chaîne JSON en une liste dynamique
     List<dynamic> jsonList = json.decode(jsonString);
-    print('JSON décodé avec succès');
+    // print('JSON décodé avec succès');
 
     // Mappe chaque élément du JSON pour créer une instance de Film
     List<Film> films = jsonList.map((json) {
