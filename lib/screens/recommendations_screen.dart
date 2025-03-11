@@ -3,8 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import '../models/film_model.dart';
 import '../widgets/films_list.dart';
-import '../widgets/films_card.dart';
-import '../widgets/titre_section.dart';  // Importation de notre widget pour les titres de sections
+import '../widgets/titre_section.dart';
+import '../widgets/top_screen_title.dart';  // Importer le widget TopScreenTitle
+
 
 class RecommendationsScreen extends StatefulWidget {
   const RecommendationsScreen({Key? key}) : super(key: key);
@@ -47,23 +48,8 @@ class _RecommendationsScreenState extends State<RecommendationsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          "Recommandations de Films",
-          style: TextStyle(
-            fontSize: 24.0, // Augmente la taille de la police pour rendre le titre plus visible
-            fontWeight: FontWeight.bold, // Gras pour le titre
-          ),
-        ),
-        centerTitle: true, // Centre le titre horizontalement
-        backgroundColor: Colors.redAccent, // Couleur rouge personnalisée
-        elevation: 5.0, // Ajoute une légère ombre sous l'AppBar
-        foregroundColor: Colors.white, // Texte en blanc
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(
-            bottom: Radius.circular(10.0), // Coins arrondis pour l'AppBar
-          ),
-        ),
+      appBar: TopScreenTitle(
+        title: "Recommandations de Films", // Titre
       ),
       body: recommendedFilms.isEmpty
           ? const Center(child: CircularProgressIndicator())

@@ -3,6 +3,8 @@ import '../models/film_model.dart';
 import '../services/film_loader.dart';
 import '../widgets/films_list.dart';
 import '../widgets/titre_section.dart';  // Importation du widget TitreSection
+import '../widgets/top_screen_title.dart';  // Importer le widget TopScreenTitle
+
 
 class TopsScreen extends StatefulWidget {
   const TopsScreen({super.key});
@@ -39,23 +41,8 @@ class _TopsScreenState extends State<TopsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          'Top Films',
-          style: TextStyle(
-            fontSize: 24.0, // Taille du texte dans l'AppBar
-            fontWeight: FontWeight.bold, // Mettre le titre en gras
-          ),
-        ),
-        centerTitle: true, // Centre le titre
-        backgroundColor: Colors.redAccent, // Couleur personnalisée de l'AppBar
-        elevation: 5.0, // Ombre sous l'AppBar
-        foregroundColor: Colors.white, // Couleur du texte de l'AppBar
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(
-            bottom: Radius.circular(10.0), // Coins arrondis
-          ),
-        ),
+      appBar: TopScreenTitle(
+        title: "Top Films", // Titre
       ),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
