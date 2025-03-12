@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/film_model.dart';
-import '../services/film_loader.dart';
+import 'package:flutter_application_1/services/APINode/auth_api_node.dart';
 import '../widgets/films_list.dart';
 import '../widgets/titre_section.dart';  // Importation du widget TitreSection
 import '../widgets/top_screen_title.dart';  // Importer le widget TopScreenTitle
@@ -17,26 +17,26 @@ class _TopsScreenState extends State<TopsScreen> {
   List<Film> films = [];
   bool isLoading = true;
 
-  @override
-  void initState() {
-    super.initState();
-    _loadFilms();
-  }
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   _loadFilms();
+  // }
 
-  Future<void> _loadFilms() async {
-    try {
-      List<Film> loadedFilms = await loadFilms();
-      setState(() {
-        films = loadedFilms;
-        isLoading = false;
-      });
-    } catch (e) {
-      print('Erreur lors du chargement des films : $e');
-      setState(() {
-        isLoading = false;
-      });
-    }
-  }
+  // Future<void> _loadFilms() async {
+  //   try {
+  //     List<Film> loadedFilms = await loadFilms();
+  //     setState(() {
+  //       films = loadedFilms;
+  //       isLoading = false;
+  //     });
+  //   } catch (e) {
+  //     print('Erreur lors du chargement des films : $e');
+  //     setState(() {
+  //       isLoading = false;
+  //     });
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {

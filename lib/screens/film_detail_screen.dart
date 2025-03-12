@@ -12,7 +12,7 @@ class FilmDetailScreen extends StatelessWidget {
       appBar: AppBar(
         title: Text(film.title),  // Affiche le titre du film dans la barre d'app
       ),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(15.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

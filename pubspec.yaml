@@ -10,6 +10,7 @@ dependencies:
   flutter:
     sdk: flutter
   cupertino_icons: ^1.0.8
+  flutter_cache_manager: ^3.3.0
 
 dev_dependencies:
   flutter_test:
@@ -23,4 +24,3 @@ flutter:
   assets:
     - assets/images/Logo_FlixPick.png
     - assets/images/icone_film.jpg
-    - lib/services/APINode/films_data.json
