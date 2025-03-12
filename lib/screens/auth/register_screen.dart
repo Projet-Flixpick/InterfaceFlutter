@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/services/APIgo/auth_api_go.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({Key? key}) : super(key: key);
@@ -8,7 +9,82 @@ class RegisterScreen extends StatefulWidget {
 }
 
 class _RegisterScreenState extends State<RegisterScreen> {
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _pseudoController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _confirmPasswordController = TextEditingController();
+  final TextEditingController _dobController = TextEditingController();
+  final AuthApiGo _authApi = AuthApiGo(); // Instance de l'API
+
   bool _isAccepted = false;
+  bool _isLoading = false;
+  String? _errorMessage;
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _pseudoController.dispose();
+    _passwordController.dispose();
+    _confirmPasswordController.dispose();
+    _dobController.dispose();
+    super.dispose();
+  }
+
+  // Fonction pour s'inscrire
+  Future<void> _onRegister() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    final String email = _emailController.text.trim();
+    final String password = _passwordController.text.trim();
+    final String confirmPassword = _confirmPasswordController.text.trim();
+    final String pseudo = _pseudoController.text.trim();
+    final String dob = _dobController.text.trim();
+
+    if (email.isEmpty || password.isEmpty || pseudo.isEmpty || dob.isEmpty) {
+      setState(() {
+        _isLoading = false;
+        _errorMessage = "Veuillez remplir tous les champs.";
+      });
+      return;
+    }
+
+    if (password != confirmPassword) {
+      setState(() {
+        _isLoading = false;
+        _errorMessage = "Les mots de passe ne correspondent pas.";
+      });
+      return;
+    }
+
+    if (!_isAccepted) {
+      setState(() {
+        _isLoading = false;
+        _errorMessage = "Vous devez accepter les conditions générales.";
+      });
+      return;
+    }
+
+    final response = await _authApi.signup(email, password);
+
+    if (response != null && response.containsKey("error")) {
+      setState(() {
+        _errorMessage = response["error"];
+      });
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Inscription réussie !")),
+      );
+
+      Navigator.pop(context); // Retour à l'écran de connexion
+    }
+
+    setState(() {
+      _isLoading = false;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +97,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              // Centrer le titre "FlixPick"
+              // Titre
               Center(
                 child: Text(
                   "FlixPick",
@@ -33,10 +109,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   textAlign: TextAlign.center,
                 ),
               ),
-              const SizedBox(
-                  height: 20), // Espacement entre le titre et l'image
+              const SizedBox(height: 20),
 
-              // Centrer l'image du logo
+              // Logo
               Center(
                 child: Image.asset(
                   'assets/images/Logo_FlixPick.png',
@@ -44,34 +119,37 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   width: 200,
                 ),
               ),
-              const SizedBox(
-                  height: 20), // Espacement entre l'image et les champs
+              const SizedBox(height: 20),
 
               // Champ Email
-              const TextField(
-                decoration: InputDecoration(labelText: "Email"),
+              TextField(
+                controller: _emailController,
+                decoration: const InputDecoration(labelText: "Email"),
               ),
 
               // Champ Pseudo
-              const TextField(
-                decoration: InputDecoration(labelText: "Pseudo"),
+              TextField(
+                controller: _pseudoController,
+                decoration: const InputDecoration(labelText: "Pseudo"),
               ),
 
               // Champ Mot de passe
-              const TextField(
-                decoration: InputDecoration(labelText: "Mot de passe"),
+              TextField(
+                controller: _passwordController,
                 obscureText: true,
+                decoration: const InputDecoration(labelText: "Mot de passe"),
               ),
 
               // Champ Confirmer Mot de passe
-              const TextField(
-                decoration:
-                    InputDecoration(labelText: "Confirmer le mot de passe"),
+              TextField(
+                controller: _confirmPasswordController,
                 obscureText: true,
+                decoration: const InputDecoration(labelText: "Confirmer le mot de passe"),
               ),
 
               // Champ Date de naissance
               TextField(
+                controller: _dobController,
                 decoration: const InputDecoration(
                   labelText: "Date de naissance",
                   hintText: "JJ/MM/AAAA",
@@ -79,8 +157,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 keyboardType: TextInputType.datetime,
               ),
 
-              const SizedBox(
-                  height: 20), // Espacement entre les champs et le bouton
+              const SizedBox(height: 20),
 
               // Case à cocher pour accepter les conditions générales
               Row(
@@ -97,7 +174,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     child: Wrap(
                       children: [
                         const Text(
-                          "J'ai lu et j'accepte les conditions générales, et la politique de confidentialité.",
+                          "J'ai lu et j'accepte les conditions générales et la politique de confidentialité.",
                           style: TextStyle(fontSize: 14),
                         ),
                       ],
@@ -106,17 +183,22 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 ],
               ),
 
-              const SizedBox(height: 20), // Espacement avant le bouton
+              const SizedBox(height: 20),
+
+              // Affichage des erreurs
+              if (_errorMessage != null)
+                Text(
+                  _errorMessage!,
+                  style: const TextStyle(color: Colors.red, fontSize: 14),
+                ),
+              const SizedBox(height: 10),
 
               // Bouton S'inscrire
               ElevatedButton(
-                onPressed: _isAccepted
-                    ? () {
-                        // Logique pour s'inscrire
-                        print("Utilisateur inscrit");
-                      }
-                    : null, // Le bouton est désactivé si les conditions ne sont pas acceptées
-                child: const Text("S'inscrire"),
+                onPressed: _isLoading ? null : _onRegister,
+                child: _isLoading
+                    ? const CircularProgressIndicator(color: Colors.white)
+                    : const Text("S'inscrire"),
               ),
             ],
           ),
