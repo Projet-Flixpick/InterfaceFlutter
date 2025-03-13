@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import '../widgets/films_list.dart';  
+import '../widgets/films_list.dart';
 import '../models/film_model.dart';
-import '../services/APINode/auth_api_node.dart';  
-import '../widgets/bottom_nav_bar.dart';  
+import '../services/APINode/auth_api_node.dart';
+import '../widgets/bottom_nav_bar.dart';
 import 'profil_screen.dart';
 import 'recommendations_screen.dart';
 import 'tops_screen.dart';
@@ -16,19 +16,42 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
-  late Future<List<Film>> _filmsFuture;
+  List<Film> films = [];
+  int currentPage = 1;
+  bool isLoading = false;
 
   @override
   void initState() {
     super.initState();
-    _filmsFuture = _loadFilms();
+    _loadFilms(); // Charger les films au démarrage
   }
 
   // Charger les films depuis l'API
-  Future<List<Film>> _loadFilms() async {
+  Future<void> _loadFilms() async {
     final authApi = AuthApiNode();
-    final filmsData = await authApi.getMovies();  
-    return filmsData.take(2).map((filmJson) => Film.fromJson(filmJson)).toList(); // Limite à 2 films
+    final filmsData = await authApi.getMovies(page: currentPage);
+    setState(() {
+      films.addAll(filmsData.take(20).map((filmJson) => Film.fromJson(filmJson)).toList());
+      currentPage++;
+    });
+  }
+
+  // Fonction pour charger plus de films
+  Future<void> _loadMoreFilms() async {
+    if (isLoading) return;
+    setState(() {
+      isLoading = true;
+    });
+
+    // Charger les films de la page suivante
+    final authApi = AuthApiNode();
+    final filmsData = await authApi.getMovies(page: currentPage);
+
+    setState(() {
+      films.addAll(filmsData.take(20).map((filmJson) => Film.fromJson(filmJson)).toList());
+      currentPage++; // Incrémenter la page
+      isLoading = false;
+    });
   }
 
   // Liste des écrans
@@ -65,51 +88,65 @@ class HomeContent extends StatefulWidget {
 }
 
 class _HomeContentState extends State<HomeContent> {
-  late Future<List<Film>> _filmsFuture;
+  List<Film> films = [];
+  int currentPage = 1;
+  bool isLoading = false;
 
   @override
   void initState() {
     super.initState();
-    _filmsFuture = _loadFilms();
+    _loadFilms();
   }
 
-  Future<List<Film>> _loadFilms() async {
+  // Charger les films depuis l'API
+  Future<void> _loadFilms() async {
     final authApi = AuthApiNode();
-    final filmsData = await authApi.getMovies();  
-    return filmsData.take(20).map((filmJson) => Film.fromJson(filmJson)).toList();
+    final filmsData = await authApi.getMovies(page: currentPage);
+    setState(() {
+      films.addAll(filmsData.take(20).map((filmJson) => Film.fromJson(filmJson)).toList());
+      currentPage++;
+    });
+  }
+
+  // Fonction pour charger plus de films
+  Future<void> _loadMoreFilms() async {
+    if (isLoading) return;
+    setState(() {
+      isLoading = true;
+    });
+
+    // Charger les films de la page suivante
+    final authApi = AuthApiNode();
+    final filmsData = await authApi.getMovies(page: currentPage);
+
+    setState(() {
+      films.addAll(filmsData.take(20).map((filmJson) => Film.fromJson(filmJson)).toList());
+      currentPage++; // Incrémenter la page
+      isLoading = false;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<List<Film>>(
-      future: _filmsFuture,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        } else if (snapshot.hasError) {
-          return Center(child: Text('Erreur: ${snapshot.error}'));
-        } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return const Center(child: Text("Aucun film trouvé"));
-        } else {
-          return SingleChildScrollView(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                children: [
-                  const Text(
-                    'Films populaires',
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  FilmsList(films: snapshot.data!),
-                ],
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            const Text(
+              'Films populaires',
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
               ),
             ),
-          );
-        }
-      },
+            FilmsList(
+              films: films, // Passer la liste des films
+              loadMoreFilms: _loadMoreFilms, // Passer la fonction pour charger plus de films
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

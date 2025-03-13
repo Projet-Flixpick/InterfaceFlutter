@@ -2,9 +2,8 @@ import 'package:flutter/material.dart';
 import '../models/film_model.dart';
 import 'package:flutter_application_1/services/APINode/auth_api_node.dart';
 import '../widgets/films_list.dart';
-import '../widgets/titre_section.dart';  // Importation du widget TitreSection
-import '../widgets/top_screen_title.dart';  // Importer le widget TopScreenTitle
-
+import '../widgets/titre_section.dart';
+import '../widgets/top_screen_title.dart';
 
 class TopsScreen extends StatefulWidget {
   const TopsScreen({super.key});
@@ -14,79 +13,132 @@ class TopsScreen extends StatefulWidget {
 }
 
 class _TopsScreenState extends State<TopsScreen> {
-  List<Film> films = [];
+  List<Film> popularFilms = [];
+  List<Film> weeklyFilms = [];
+  List<Film> shortFilms = [];
+  List<Film> weeklyShortFilms = [];
+  int currentPagePopular = 1;
+  int currentPageWeekly = 1;
+  int currentPageShort = 1;
+  int currentPageWeeklyShort = 1;
   bool isLoading = true;
 
-  // @override
-  // void initState() {
-  //   super.initState();
-  //   _loadFilms();
-  // }
+  @override
+  void initState() {
+    super.initState();
+    _loadFilms();
+  }
 
-  // Future<void> _loadFilms() async {
-  //   try {
-  //     List<Film> loadedFilms = await loadFilms();
-  //     setState(() {
-  //       films = loadedFilms;
-  //       isLoading = false;
-  //     });
-  //   } catch (e) {
-  //     print('Erreur lors du chargement des films : $e');
-  //     setState(() {
-  //       isLoading = false;
-  //     });
-  //   }
-  // }
+  Future<void> _loadFilms() async {
+    final authApi = AuthApiNode();
+
+    final popularFilmsData = await authApi.getMovies(page: currentPagePopular);
+    final weeklyFilmsData = await authApi.getMovies(page: currentPageWeekly);
+    final shortFilmsData = await authApi.getMovies(page: currentPageShort);
+    final weeklyShortFilmsData = await authApi.getMovies(page: currentPageWeeklyShort);
+
+    setState(() {
+      popularFilms.addAll(popularFilmsData.take(5).map((filmJson) => Film.fromJson(filmJson)).toList());
+      weeklyFilms.addAll(weeklyFilmsData.take(5).map((filmJson) => Film.fromJson(filmJson)).toList());
+      shortFilms.addAll(shortFilmsData.take(5).map((filmJson) => Film.fromJson(filmJson)).toList());
+      weeklyShortFilms.addAll(weeklyShortFilmsData.take(5).map((filmJson) => Film.fromJson(filmJson)).toList());
+      isLoading = false;
+    });
+  }
+
+  Future<void> _loadMoreFilms(String section) async {
+    if (isLoading) return;
+    setState(() {
+      isLoading = true;
+    });
+
+    List<Film> filmsToAdd = [];
+    if (section == "popular") {
+      final newFilms = await AuthApiNode().getMovies(page: currentPagePopular);
+      filmsToAdd = newFilms.take(5).map((filmJson) => Film.fromJson(filmJson)).toList();
+      currentPagePopular++;
+    } else if (section == "weekly") {
+      final newFilms = await AuthApiNode().getMovies(page: currentPageWeekly);
+      filmsToAdd = newFilms.take(5).map((filmJson) => Film.fromJson(filmJson)).toList();
+      currentPageWeekly++;
+    } else if (section == "short") {
+      final newFilms = await AuthApiNode().getMovies(page: currentPageShort);
+      filmsToAdd = newFilms.take(5).map((filmJson) => Film.fromJson(filmJson)).toList();
+      currentPageShort++;
+    } else if (section == "weeklyShort") {
+      final newFilms = await AuthApiNode().getMovies(page: currentPageWeeklyShort);
+      filmsToAdd = newFilms.take(5).map((filmJson) => Film.fromJson(filmJson)).toList();
+      currentPageWeeklyShort++;
+    }
+
+    setState(() {
+      if (section == "popular") {
+        popularFilms.addAll(filmsToAdd);
+      } else if (section == "weekly") {
+        weeklyFilms.addAll(filmsToAdd);
+      } else if (section == "short") {
+        shortFilms.addAll(filmsToAdd);
+      } else if (section == "weeklyShort") {
+        weeklyShortFilms.addAll(filmsToAdd);
+      }
+      isLoading = false;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: TopScreenTitle(
-        title: "Top Films", // Titre
+        title: "Top Films",
       ),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
           : ListView(
               children: [
-                // Films populaires
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 15.0),
                   child: TitreSection(
                     title: 'Top des Films Populaires',
-                    sectionColor: Colors.blueAccent, // Couleur de fond de la section
+                    sectionColor: Colors.blueAccent,
                   ),
                 ),
-                FilmsList(films: films), // Affichage de la liste des films populaires
-                
-                // Films de la semaine
+                FilmsList(
+                  films: popularFilms,
+                  loadMoreFilms: () => _loadMoreFilms("popular"),
+                ),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 15.0),
                   child: TitreSection(
                     title: 'Films de la Semaine',
-                    sectionColor: Colors.indigo, // Couleur de fond de la section
+                    sectionColor: Colors.indigo,
                   ),
                 ),
-                FilmsList(films: films), // Affichage de la liste des films de la semaine
-                
-                // Top Courts-Métrages
+                FilmsList(
+                  films: weeklyFilms,
+                  loadMoreFilms: () => _loadMoreFilms("weekly"),
+                ),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 15.0),
                   child: TitreSection(
                     title: 'Top Courts-Métrages',
-                    sectionColor: Colors.teal // Couleur de fond de la section
+                    sectionColor: Colors.teal,
                   ),
                 ),
-                FilmsList(films: films), // Affichage de tous les films, sans filtrage
-
-                // Top Courts-Métrages de la semaine
+                FilmsList(
+                  films: shortFilms,
+                  loadMoreFilms: () => _loadMoreFilms("short"),
+                ),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 15.0),
                   child: TitreSection(
                     title: 'Courts-Métrages de la semaine',
-                    sectionColor: Colors.tealAccent // Couleur de fond de la section
+                    sectionColor: Colors.tealAccent,
                   ),
                 ),
-                FilmsList(films: films), // Affichage de tous les films, sans filtrage
+                FilmsList(
+                  films: weeklyShortFilms,
+                  loadMoreFilms: () => _loadMoreFilms("weeklyShort"),
+                ),
               ],
             ),
     );
