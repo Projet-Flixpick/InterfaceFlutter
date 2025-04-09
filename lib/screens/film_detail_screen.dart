@@ -91,7 +91,7 @@ class FilmDetailScreen extends StatelessWidget {
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 10),
-            if (cast != null && cast.isNotEmpty) ...[
+            if (cast.isNotEmpty) ...[
               Wrap(
                 spacing: 10,
                 children: cast.map<Widget>((actor) {

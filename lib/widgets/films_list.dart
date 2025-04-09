@@ -15,13 +15,13 @@ class FilmsList extends StatefulWidget {
 
 class _FilmsListState extends State<FilmsList> {
   late ScrollController _scrollController;
-  bool isLoading = false;
+  bool isLoading = false; // Variable d'état local pour le chargement
 
   @override
   void initState() {
     super.initState();
     _scrollController = ScrollController();
-    _scrollController.addListener(_scrollListener);
+    _scrollController.addListener(_scrollListener);  // Écouteur de scroll
   }
 
   @override
@@ -34,11 +34,11 @@ class _FilmsListState extends State<FilmsList> {
     // Si on arrive à la fin de la liste, on charge plus de films
     if (_scrollController.position.pixels == _scrollController.position.maxScrollExtent && !isLoading) {
       setState(() {
-        isLoading = true;
+        isLoading = true;  // Mettre isLoading à true pour indiquer qu'on charge plus de films
       });
       widget.loadMoreFilms().then((_) {
         setState(() {
-          isLoading = false;
+          isLoading = false;  // Remettre isLoading à false une fois les films chargés
         });
       });
     }
@@ -51,14 +51,14 @@ class _FilmsListState extends State<FilmsList> {
       child: ListView.builder(
         controller: _scrollController,
         scrollDirection: Axis.horizontal,
-        itemCount: widget.films.length + (isLoading ? 1 : 0), // Afficher 1 de plus pour le loader
+        itemCount: widget.films.length + (isLoading ? 1 : 0), // Ajouter 1 pour le loader si isLoading est true
         itemBuilder: (context, index) {
           if (index == widget.films.length) {
-            return Center(child: CircularProgressIndicator());
+            return Center(child: CircularProgressIndicator());  // Afficher le loader si isLoading est true
           } else {
             return Padding(
               padding: const EdgeInsets.only(right: 5), // Ajouter un espace entre les films
-              child: FilmsCard(film: widget.films[index]),
+              child: FilmsCard(film: widget.films[index]), // Afficher le film
             );
           }
         },

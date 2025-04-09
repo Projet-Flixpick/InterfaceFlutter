@@ -33,4 +33,32 @@ class AuthApiNode {
     throw Exception("Erreur réseau : $e");
     }
   }
+
+    /// Récupérer la liste des courts métrages avec une pagination
+  Future<List<dynamic>> getShortMovies({int page = 1}) async {
+    final String url = "$baseUrl/shortmovies?page=$page";
+
+    // Vérification du cache
+    final file = await _cacheManager.getFileFromCache(url);
+    if (file != null) {
+      final cachedData = await file.file.readAsString();
+      final jsonData = jsonDecode(cachedData);
+      return jsonData['data']; // Extraire la liste des courts métrages
+    }
+
+    try {
+      final response = await http.get(Uri.parse(url));
+      if (response.statusCode == 200) {
+        final jsonData = jsonDecode(response.body);
+        _cacheManager.putFile(url, response.bodyBytes); // Stocker en cache
+        return jsonData['data'];
+      } else {
+        throw Exception("Échec de la récupération des courts métrages.");
+      }
+    } catch (e) {
+      print("Erreur lors de la récupération des courts métrages : $e");
+      return [];
+    }
+  }
+
 }

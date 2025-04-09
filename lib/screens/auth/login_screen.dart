@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../home_screen.dart';
 import '../auth/register_screen.dart';
+import 'package:flutter_application_1/screens/choisir_genres_screen.dart';
 import 'package:flutter_application_1/services/APIgo/auth_api_go.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -13,7 +15,7 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final AuthApiGo _authApi = AuthApiGo(); // Instance de l'API
+  final AuthApiGo _authApi = AuthApiGo();
 
   bool _isLoading = false;
   String? _errorMessage;
@@ -25,7 +27,6 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
-  // Fonction pour se connecter
   Future<void> _onLogin() async {
     setState(() {
       _isLoading = true;
@@ -43,18 +44,24 @@ class _LoginScreenState extends State<LoginScreen> {
       return;
     }
 
-    final response = await _authApi.login(email, password); // Appel API
+    final response = await _authApi.login(email, password);
 
     if (response != null && response.containsKey("error")) {
       setState(() {
         _errorMessage = response["error"];
       });
-    } else {
+    } else if (response != null && response.containsKey("token")) {
+      final token = response["token"];
+
+      // Stocker le token dans SharedPreferences
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString("jwt_token", token);
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Connexion réussie !")),
       );
 
-      // Redirection vers l'accueil après connexion
+      // Redirection vers l'accueil
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const HomeScreen()),
@@ -77,7 +84,6 @@ class _LoginScreenState extends State<LoginScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // Titre
                 Text(
                   "FlixPick",
                   style: TextStyle(
@@ -88,8 +94,6 @@ class _LoginScreenState extends State<LoginScreen> {
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 20),
-
-                // Logo
                 Image.asset(
                   'assets/images/Logo_FlixPick.png',
                   height: 200,
@@ -97,14 +101,12 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 const SizedBox(height: 20),
 
-                // Champ email
                 TextField(
                   controller: _emailController,
                   decoration: const InputDecoration(labelText: "Email"),
                 ),
                 const SizedBox(height: 10),
 
-                // Champ mot de passe
                 TextField(
                   controller: _passwordController,
                   obscureText: true,
@@ -112,7 +114,6 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 const SizedBox(height: 20),
 
-                // Affichage des erreurs
                 if (_errorMessage != null)
                   Text(
                     _errorMessage!,
@@ -120,7 +121,6 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 const SizedBox(height: 10),
 
-                // Bouton de connexion
                 ElevatedButton(
                   onPressed: _isLoading ? null : _onLogin,
                   child: _isLoading
@@ -129,7 +129,6 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 const SizedBox(height: 20),
 
-                // Lien pour aller à l'inscription
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -147,13 +146,12 @@ class _LoginScreenState extends State<LoginScreen> {
                   ],
                 ),
 
-                // Bouton Skip pour accéder à HomeScreen sans connexion
                 TextButton(
                   onPressed: () {
                     Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => const HomeScreen()),
+                          builder: (context) => const ChoisirGenresScreen()),
                     );
                   },
                   child: const Text(
@@ -161,6 +159,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     style: TextStyle(color: Colors.blue, fontSize: 16),
                   ),
                 ),
+
               ],
             ),
           ),

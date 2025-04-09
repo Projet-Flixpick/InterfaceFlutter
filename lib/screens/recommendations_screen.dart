@@ -1,10 +1,8 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart' show rootBundle;
+import 'package:flutter_application_1/services/APINode/auth_api_node.dart'; // Assure-toi que ton API est bien importée
 import '../models/film_model.dart';
 import '../widgets/films_list.dart';
 import '../widgets/titre_section.dart';
-import '../widgets/top_screen_title.dart';
 
 class RecommendationsScreen extends StatefulWidget {
   const RecommendationsScreen({Key? key}) : super(key: key);
@@ -19,38 +17,43 @@ class _RecommendationsScreenState extends State<RecommendationsScreen> {
   List<Film> ifwatchedFilms = [];
   List<Film> newReleases = [];
   List<Film> duoFilms = [];
+  
   int currentPageRecommended = 1;
   int currentPageGenre = 1;
   int currentPageIfwatched = 1;
   int currentPageNewReleases = 1;
   int currentPageDuo = 1;
+
   bool isLoading = false;
 
   @override
   void initState() {
     super.initState();
-    _loadFilmsFromJson(); // Charger les films de départ
+    _loadFilms(); // Charger les films via l'API au démarrage
   }
 
-  Future<void> _loadFilmsFromJson() async {
-    try {
-      String data = await rootBundle.loadString('lib/services/APINode/films_data.json');
-      List<dynamic> jsonList = json.decode(data);
-      List<Film> films = jsonList.map((json) => Film.fromJson(json)).toList();
+  // Charger les films depuis l'API
+  Future<void> _loadFilms() async {
+    final authApi = AuthApiNode();
 
-      setState(() {
-        recommendedFilms = films.take(7).toList();
-        genreFilms = films.take(5).toList();
-        ifwatchedFilms = films.take(5).toList();
-        newReleases = films.take(5).toList();
-        duoFilms = films.take(5).toList();
-      });
-    } catch (e) {
-      print("Erreur lors du chargement des films : $e");
-    }
+    // Charger les films pour chaque catégorie
+    final recommendedFilmsData = await authApi.getMovies(page: currentPageRecommended);
+    final genreFilmsData = await authApi.getMovies(page: currentPageGenre);
+    final ifwatchedFilmsData = await authApi.getMovies(page: currentPageIfwatched);
+    final newReleasesData = await authApi.getMovies(page: currentPageNewReleases);
+    final duoFilmsData = await authApi.getMovies(page: currentPageDuo);
+
+    setState(() {
+      recommendedFilms = recommendedFilmsData.take(7).map((filmJson) => Film.fromJson(filmJson)).toList();
+      genreFilms = genreFilmsData.take(5).map((filmJson) => Film.fromJson(filmJson)).toList();
+      ifwatchedFilms = ifwatchedFilmsData.take(5).map((filmJson) => Film.fromJson(filmJson)).toList();
+      newReleases = newReleasesData.take(5).map((filmJson) => Film.fromJson(filmJson)).toList();
+      duoFilms = duoFilmsData.take(5).map((filmJson) => Film.fromJson(filmJson)).toList();
+      isLoading = false;
+    });
   }
 
-  // Fonction de pagination pour charger plus de films
+  // Fonction de pagination pour charger plus de films dans chaque catégorie
   Future<void> _loadMoreFilms(String section) async {
     if (isLoading) return;
 
@@ -58,38 +61,41 @@ class _RecommendationsScreenState extends State<RecommendationsScreen> {
       isLoading = true;
     });
 
-    // Simulation de pagination pour chaque section
     List<Film> filmsToAdd = [];
     if (section == "recommended") {
-      filmsToAdd = recommendedFilms.take(7 * currentPageRecommended).toList();
+      final newFilms = await AuthApiNode().getMovies(page: currentPageRecommended);
+      filmsToAdd = newFilms.take(7).map((filmJson) => Film.fromJson(filmJson)).toList();
       currentPageRecommended++;
     } else if (section == "genre") {
-      filmsToAdd = genreFilms.take(5 * currentPageGenre).toList();
+      final newFilms = await AuthApiNode().getMovies(page: currentPageGenre);
+      filmsToAdd = newFilms.take(5).map((filmJson) => Film.fromJson(filmJson)).toList();
       currentPageGenre++;
     } else if (section == "ifwatched") {
-      filmsToAdd = ifwatchedFilms.take(5 * currentPageIfwatched).toList();
+      final newFilms = await AuthApiNode().getMovies(page: currentPageIfwatched);
+      filmsToAdd = newFilms.take(5).map((filmJson) => Film.fromJson(filmJson)).toList();
       currentPageIfwatched++;
     } else if (section == "newReleases") {
-      filmsToAdd = newReleases.take(5 * currentPageNewReleases).toList();
+      final newFilms = await AuthApiNode().getMovies(page: currentPageNewReleases);
+      filmsToAdd = newFilms.take(5).map((filmJson) => Film.fromJson(filmJson)).toList();
       currentPageNewReleases++;
     } else if (section == "duoFilms") {
-      filmsToAdd = duoFilms.take(5 * currentPageDuo).toList();
+      final newFilms = await AuthApiNode().getMovies(page: currentPageDuo);
+      filmsToAdd = newFilms.take(5).map((filmJson) => Film.fromJson(filmJson)).toList();
       currentPageDuo++;
     }
 
     setState(() {
       if (section == "recommended") {
-        recommendedFilms = filmsToAdd;
+        recommendedFilms.addAll(filmsToAdd);
       } else if (section == "genre") {
-        genreFilms = filmsToAdd;
+        genreFilms.addAll(filmsToAdd);
       } else if (section == "ifwatched") {
-        ifwatchedFilms = filmsToAdd;
+        ifwatchedFilms.addAll(filmsToAdd);
       } else if (section == "newReleases") {
-        newReleases = filmsToAdd;
+        newReleases.addAll(filmsToAdd);
       } else if (section == "duoFilms") {
-        duoFilms = filmsToAdd;
+        duoFilms.addAll(filmsToAdd);
       }
-
       isLoading = false;
     });
   }
@@ -97,10 +103,7 @@ class _RecommendationsScreenState extends State<RecommendationsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: TopScreenTitle(
-        title: "Recommandations de Films",
-      ),
-      body: recommendedFilms.isEmpty
+      body: isLoading
           ? const Center(child: CircularProgressIndicator())
           : ListView(
               children: [

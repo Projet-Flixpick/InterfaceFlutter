@@ -1,8 +1,17 @@
 import 'package:flutter/material.dart';
+
+// Widgets
 import '../widgets/films_list.dart';
-import '../models/film_model.dart';
-import '../services/APINode/auth_api_node.dart';
 import '../widgets/bottom_nav_bar.dart';
+import '../widgets/top_screen_title.dart';
+
+// Models
+import '../models/film_model.dart';
+
+// Services
+import '../services/APINode/auth_api_node.dart';
+
+// Screens
 import 'profil_screen.dart';
 import 'recommendations_screen.dart';
 import 'tops_screen.dart';
@@ -62,6 +71,14 @@ class _HomeScreenState extends State<HomeScreen> {
     ProfileScreen(),
   ];
 
+  // Liste des titres des écrans
+  final List<String> _titles = [
+    "Home", 
+    "Top Films", 
+    "Recommendations de films", 
+    "Profil Utilisateur"
+  ];
+
   // Fonction pour changer de page
   void _onItemTapped(int index) {
     setState(() {
@@ -72,6 +89,10 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      // Utilisation de TopScreenTitle pour afficher le titre dynamique
+      appBar: TopScreenTitle(
+        title: _titles[_selectedIndex], // Le titre dynamique basé sur l'écran sélectionné
+      ),
       body: _screens[_selectedIndex], // Afficher l'écran sélectionné
       bottomNavigationBar: BottomNavBar(
         selectedIndex: _selectedIndex,
