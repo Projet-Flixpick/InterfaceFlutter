@@ -1,8 +1,8 @@
   import 'package:flutter/material.dart';
-  import '../models/film_model.dart';
+  import '../../models/film_model.dart';
   import 'package:flutter_application_1/services/APINode/auth_api_node.dart';
-  import '../widgets/films_list.dart';
-  import '../widgets/titre_section.dart';
+  import '../../widgets/films_list.dart';
+  import '../../widgets/titre_section.dart';
 
   class TopsScreen extends StatefulWidget {
     const TopsScreen({super.key});

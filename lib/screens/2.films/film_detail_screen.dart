@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../models/film_model.dart';  // Assurez-vous que Film contient les informations nécessaires.
+import '../../models/film_model.dart';  // Assurez-vous que Film contient les informations nécessaires.
 import 'package:url_launcher/url_launcher.dart';  // Pour ouvrir les liens externes.
 
 class FilmDetailScreen extends StatelessWidget {

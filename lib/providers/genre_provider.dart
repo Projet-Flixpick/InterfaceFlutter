@@ -15,7 +15,7 @@ class GenreProvider with ChangeNotifier {
   String getGenreNameById(int id) {
     return _genres.firstWhere(
       (g) => g.id == id,
-      orElse: () => Genre(id: id, name: "Inconnu"),
+      orElse: () => Genre(mongoId: '', id: id, name: "Inconnu"),
     ).name;
   }
 }

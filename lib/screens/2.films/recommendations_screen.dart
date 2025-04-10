@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/services/APINode/auth_api_node.dart'; // Assure-toi que ton API est bien importée
-import '../models/film_model.dart';
-import '../widgets/films_list.dart';
-import '../widgets/titre_section.dart';
+import '../../models/film_model.dart';
+import '../../widgets/films_list.dart';
+import '../../widgets/titre_section.dart';
 
 class RecommendationsScreen extends StatefulWidget {
   const RecommendationsScreen({Key? key}) : super(key: key);

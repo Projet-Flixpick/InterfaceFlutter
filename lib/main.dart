@@ -6,9 +6,9 @@ import 'package:provider/provider.dart';
 import 'providers/genre_provider.dart';
 
 // Screens
-import 'screens/auth/login_screen.dart';
-import 'screens/choisir_genres_screen.dart';
-import 'screens/home_screen.dart';
+import 'screens/0.auth/login_screen.dart';
+import 'screens/4.autre/choisir_genres_screen.dart';
+import 'screens/1.home/home_screen.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();

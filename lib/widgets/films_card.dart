@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../screens/film_detail_screen.dart';
+import '../screens/2.films/film_detail_screen.dart';
 import '../models/film_model.dart';
 
 class FilmsCard extends StatelessWidget {

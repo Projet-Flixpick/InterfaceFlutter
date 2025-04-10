@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../providers/genre_provider.dart';
-import '../../models/genre_model.dart';
-import '../../widgets/titre_section.dart';
-import '../../widgets/top_screen_title.dart';
-import '../../widgets/bottom_nav_bar.dart';
-import 'home_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+
+import '../../../providers/genre_provider.dart';
+import '../../../models/genre_model.dart';
+import '../../../widgets/titre_section.dart';
+import '../../../widgets/top_screen_title.dart';
+import '../../../widgets/bottom_nav_bar.dart';
+import '../1.home/home_screen.dart';
 
 class ChoisirGenresScreen extends StatefulWidget {
   const ChoisirGenresScreen({super.key});
@@ -16,22 +20,52 @@ class ChoisirGenresScreen extends StatefulWidget {
 
 class _ChoisirGenresScreenState extends State<ChoisirGenresScreen> {
   final List<int> selectedGenreIds = [];
+  final Set<String> selectedMongoIds = {};
   int _selectedIndex = 0;
 
-  void toggleGenre(int id) {
+  void toggleGenre(Genre genre) {
     setState(() {
-      selectedGenreIds.contains(id)
-          ? selectedGenreIds.remove(id)
-          : selectedGenreIds.add(id);
+      if (selectedGenreIds.contains(genre.id)) {
+        selectedGenreIds.remove(genre.id);
+        selectedMongoIds.remove(genre.mongoId);
+      } else {
+        selectedGenreIds.add(genre.id);
+        selectedMongoIds.add(genre.mongoId);
+      }
     });
   }
 
-  void continuer() {
-    print('Genres sélectionnés : $selectedGenreIds');
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => const HomeScreen()),
-    );
+  Future<void> continuer() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('jwt_token');
+
+    try {
+      final response = await http.put(
+        Uri.parse('http://127.0.0.1:3000/api/protected/updateGenres'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode({
+          "genres": selectedMongoIds.toList(),
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const HomeScreen()),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Erreur API : ${response.body}")),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Erreur de connexion.")),
+      );
+    }
   }
 
   void _onItemTapped(int index) {
@@ -99,7 +133,10 @@ class _ChoisirGenresScreenState extends State<ChoisirGenresScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const TitreSection(title: 'Choisi tes genres préférés', sectionColor: Colors.deepOrange),
+                  const TitreSection(
+                    title: 'Choisi tes genres préférés',
+                    sectionColor: Colors.deepOrange,
+                  ),
                   const SizedBox(height: 16),
                   Expanded(
                     child: GridView.builder(
@@ -114,11 +151,13 @@ class _ChoisirGenresScreenState extends State<ChoisirGenresScreen> {
                         final genre = genres[index];
                         final isSelected = selectedGenreIds.contains(genre.id);
                         return GestureDetector(
-                          onTap: () => toggleGenre(genre.id),
+                          onTap: () => toggleGenre(genre),
                           child: Container(
                             padding: const EdgeInsets.symmetric(horizontal: 12),
                             decoration: BoxDecoration(
-                              color: isSelected ? const Color.fromARGB(255, 240, 82, 108).withAlpha((0.9 * 255).toInt()) : Colors.grey.shade100,
+                              color: isSelected
+                                  ? const Color.fromARGB(255, 240, 82, 108).withAlpha((0.9 * 255).toInt())
+                                  : Colors.grey.shade100,
                               borderRadius: BorderRadius.circular(16),
                               boxShadow: [
                                 BoxShadow(

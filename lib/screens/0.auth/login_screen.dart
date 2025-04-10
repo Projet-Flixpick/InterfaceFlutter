@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../home_screen.dart';
-import '../auth/register_screen.dart';
-import 'package:flutter_application_1/screens/choisir_genres_screen.dart';
+import '../1.home/home_screen.dart';
+import 'register_screen.dart';
+import 'package:flutter_application_1/screens/4.autre/choisir_genres_screen.dart';
 import 'package:flutter_application_1/services/APIgo/auth_api_go.dart';
 
 class LoginScreen extends StatefulWidget {

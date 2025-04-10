@@ -1,20 +1,20 @@
 import 'package:flutter/material.dart';
 
 // Widgets
-import '../widgets/films_list.dart';
-import '../widgets/bottom_nav_bar.dart';
-import '../widgets/top_screen_title.dart';
+import '../../widgets/films_list.dart';
+import '../../widgets/bottom_nav_bar.dart';
+import '../../widgets/top_screen_title.dart';
 
 // Models
-import '../models/film_model.dart';
+import '../../models/film_model.dart';
 
 // Services
-import '../services/APINode/auth_api_node.dart';
+import '../../services/APINode/auth_api_node.dart';
 
 // Screens
-import 'profil_screen.dart';
-import 'recommendations_screen.dart';
-import 'tops_screen.dart';
+import '../3.profile/profil_screen.dart';
+import '../2.films/recommendations_screen.dart';
+import '../2.films/tops_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
