@@ -45,23 +45,6 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
-  // Fonction pour charger plus de films
-  Future<void> _loadMoreFilms() async {
-    if (isLoading) return;
-    setState(() {
-      isLoading = true;
-    });
-
-    // Charger les films de la page suivante
-    final authApi = AuthApiNode();
-    final filmsData = await authApi.getMovies(page: currentPage);
-
-    setState(() {
-      films.addAll(filmsData.take(20).map((filmJson) => Film.fromJson(filmJson)).toList());
-      currentPage++; // Incrémenter la page
-      isLoading = false;
-    });
-  }
 
   // Liste des écrans
   final List<Widget> _screens = [

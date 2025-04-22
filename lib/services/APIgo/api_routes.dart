@@ -11,4 +11,8 @@ class ApiRoutes {
   static const String deleteUser = '$baseUrl/protected/deleteUser';
   static const String addLike = '$baseUrl/protected/addLike';
   static const String addDislike = '$baseUrl/protected/addDislike';
+  static const String deleteLike = '$baseUrl/protected/deleteLike';
+  static const String deleteDislike = '$baseUrl/protected/deleteDislike';
+ static const String addSeenMovie = '$baseUrl/protected/addSeenMovie';
+  static const String deleteSeenMovie = '$baseUrl/protected/deleteSeenMovie';
 }

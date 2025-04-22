@@ -52,21 +52,28 @@ class _LoginScreenState extends State<LoginScreen> {
       });
     } else if (response != null && response.containsKey("token")) {
       final token = response["token"];
+      final user = response["user"]; // doit être retourné par l'API !
 
-      // Stocker le token dans SharedPreferences
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString("jwt_token", token);
+
+      // Stockage infos utilisateur
+      if (user != null) {
+        await prefs.setString("email", user["email"] ?? "");
+        await prefs.setString("firstname", user["firstname"] ?? "");
+        await prefs.setString("name", user["name"] ?? "");
+      }
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Connexion réussie !")),
       );
 
-      // Redirection vers l'accueil
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const HomeScreen()),
       );
     }
+
 
     setState(() {
       _isLoading = false;
@@ -134,12 +141,18 @@ class _LoginScreenState extends State<LoginScreen> {
                   children: [
                     const Text("Pas encore de compte ? "),
                     TextButton(
-                      onPressed: () {
-                        Navigator.push(
+                      onPressed: () async {
+                        final result = await Navigator.push(
                           context,
-                          MaterialPageRoute(
-                              builder: (context) => const RegisterScreen()),
+                          MaterialPageRoute(builder: (context) => const RegisterScreen()),
                         );
+
+                        // Si un email est retourné → on le pré-remplit
+                        if (result != null && result is String) {
+                          setState(() {
+                            _emailController.text = result;
+                          });
+                        }
                       },
                       child: const Text("S'inscrire"),
                     ),

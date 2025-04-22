@@ -1,30 +1,30 @@
 import 'package:flutter/material.dart';
-import '../../models/film_model.dart';  // Assurez-vous que Film contient les informations nécessaires.
-import 'package:url_launcher/url_launcher.dart';  // Pour ouvrir les liens externes.
+import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
+
+import '../../models/film_model.dart';
+import '../../providers/film_statut_provider.dart';
+import '../../providers/genre_provider.dart';
 
 class FilmDetailScreen extends StatelessWidget {
-  final Film film;  // On passe l'objet film à cette page
+  final Film film;
 
   const FilmDetailScreen({Key? key, required this.film}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    // Récupérer les providers pour la France (FR)
     final providers = film.providers?['FR'];
-
-    // Récupérer les acteurs
     final cast = film.cast;
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(film.title),  // Affiche le titre du film dans la barre d'app
+        title: Text(film.title),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(15.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Affiche l'affiche du film
             Image.network(
               'https://image.tmdb.org/t/p/w500${film.posterPath}',
               width: double.infinity,
@@ -49,9 +49,64 @@ class FilmDetailScreen extends StatelessWidget {
               film.overview,
               style: const TextStyle(fontSize: 16),
             ),
-            
-            // Section des providers (achat ou location)
             const SizedBox(height: 20),
+
+            // Genres associés
+            Consumer<GenreProvider>(
+              builder: (context, genreProvider, _) {
+                return Wrap(
+                  spacing: 6,
+                  children: film.genres.map((genreIdOrName) {
+                    final genreName = genreProvider.getGenreNameById(int.tryParse(genreIdOrName) ?? -1);
+                    return Chip(
+                      label: Text(genreName),
+                      visualDensity: VisualDensity.compact,
+                      backgroundColor: Colors.deepOrange.shade100,
+                    );
+                  }).toList(),
+                );
+              },
+            ),
+
+            const SizedBox(height: 10),
+
+            // Boutons Like / Dislike / Vu
+            Consumer<FilmStatutProvider>(
+              builder: (context, statutProvider, _) {
+                final id = film.mongoId;
+                final isLiked = statutProvider.isLiked(id);
+                final isDisliked = statutProvider.isDisliked(id);
+                final isSeen = statutProvider.isSeen(id);
+
+                return Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    IconButton(
+                      icon: Icon(Icons.thumb_up,
+                          color: isLiked ? Colors.green : Colors.grey),
+                      onPressed: () => statutProvider.toggleLike(id),
+                      tooltip: "J'aime",
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.thumb_down,
+                          color: isDisliked ? Colors.red : Colors.grey),
+                      onPressed: () => statutProvider.toggleDislike(id),
+                      tooltip: "Je n'aime pas",
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.remove_red_eye,
+                          color: isSeen ? Colors.blue : Colors.grey),
+                      onPressed: () => statutProvider.toggleVu(id),
+                      tooltip: "Vu",
+                    ),
+                  ],
+                );
+              },
+            ),
+
+            const SizedBox(height: 20),
+
+            // 🎥 Où louer ou acheter
             if (providers != null) ...[
               const Text(
                 'Où acheter ou louer le film ?',
@@ -84,20 +139,20 @@ class FilmDetailScreen extends StatelessWidget {
               ],
             ],
 
-            // Section des acteurs
             const SizedBox(height: 20),
+
             const Text(
               'Acteurs principaux',
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 10),
+
             if (cast.isNotEmpty) ...[
               Wrap(
                 spacing: 10,
                 children: cast.map<Widget>((actor) {
                   return Column(
                     children: [
-                      // Affiche l'image de l'acteur (si disponible)
                       CircleAvatar(
                         radius: 30,
                         backgroundImage: actor.profilePath != null
@@ -119,7 +174,6 @@ class FilmDetailScreen extends StatelessWidget {
     );
   }
 
-  // Fonction pour ouvrir un URL dans un navigateur
   void _launchURL(String url) async {
     if (await canLaunch(url)) {
       await launch(url);

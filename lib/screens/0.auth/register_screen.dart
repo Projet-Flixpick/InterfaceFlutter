@@ -71,7 +71,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
     final response = await _authApi.signup(email, password, dob, name, firstname);
 
-    if (response != null && response.containsKey("error")) {
+    if (response == null) {
+      setState(() {
+        _errorMessage = "Erreur inattendue. Veuillez réessayer.";
+      });
+    } else if (response.containsKey("error")) {
       setState(() {
         _errorMessage = response["error"];
       });
@@ -79,12 +83,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Inscription réussie !")),
       );
-      Navigator.pop(context);
+      Navigator.pop(context, email); // retourne aussi l'e-mail
     }
 
-    setState(() {
-      _isLoading = false;
-    });
   }
 
   @override

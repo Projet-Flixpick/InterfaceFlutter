@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 
 // Providers
 import 'providers/genre_provider.dart';
+import 'providers/film_statut_provider.dart'; // <-- ajoute ce provider
 
 // Screens
 import 'screens/0.auth/login_screen.dart';
@@ -25,6 +26,7 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => GenreProvider()..loadGenres()),
+        ChangeNotifierProvider(create: (_) => FilmStatutProvider()), // <-- ici
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
