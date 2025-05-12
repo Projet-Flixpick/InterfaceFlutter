@@ -74,14 +74,6 @@ class _RecommendationsScreenState extends State<RecommendationsScreen> {
       final newFilms = await AuthApiNode().getMovies(page: currentPageIfwatched);
       filmsToAdd = newFilms.take(5).map((filmJson) => Film.fromJson(filmJson)).toList();
       currentPageIfwatched++;
-    } else if (section == "newReleases") {
-      final newFilms = await AuthApiNode().getMovies(page: currentPageNewReleases);
-      filmsToAdd = newFilms.take(5).map((filmJson) => Film.fromJson(filmJson)).toList();
-      currentPageNewReleases++;
-    } else if (section == "duoFilms") {
-      final newFilms = await AuthApiNode().getMovies(page: currentPageDuo);
-      filmsToAdd = newFilms.take(5).map((filmJson) => Film.fromJson(filmJson)).toList();
-      currentPageDuo++;
     }
 
     setState(() {
@@ -91,10 +83,6 @@ class _RecommendationsScreenState extends State<RecommendationsScreen> {
         genreFilms.addAll(filmsToAdd);
       } else if (section == "ifwatched") {
         ifwatchedFilms.addAll(filmsToAdd);
-      } else if (section == "newReleases") {
-        newReleases.addAll(filmsToAdd);
-      } else if (section == "duoFilms") {
-        duoFilms.addAll(filmsToAdd);
       }
       isLoading = false;
     });
@@ -128,28 +116,6 @@ class _RecommendationsScreenState extends State<RecommendationsScreen> {
                 FilmsList(
                   films: ifwatchedFilms,
                   loadMoreFilms: () => _loadMoreFilms("ifwatched"),
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 15.0),
-                  child: TitreSection(
-                    title: "Nouveautés récentes",
-                    sectionColor: Colors.amber,
-                  ),
-                ),
-                FilmsList(
-                  films: newReleases,
-                  loadMoreFilms: () => _loadMoreFilms("newReleases"),
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 15.0),
-                  child: TitreSection(
-                    title: "Films que toi & X aimeraient",
-                    sectionColor: Colors.pinkAccent,
-                  ),
-                ),
-                FilmsList(
-                  films: duoFilms,
-                  loadMoreFilms: () => _loadMoreFilms("duoFilms"),
                 ),
               ],
             ),

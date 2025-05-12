@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_application_1/services/APIgo/api_routes.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-
-import '../services/APIgo/api_routes.dart';
 
 class FilmStatutProvider with ChangeNotifier {
   Set<String> _likes = {};
@@ -14,58 +13,77 @@ class FilmStatutProvider with ChangeNotifier {
   Set<String> get dislikes => _dislikes;
   Set<String> get vu => _vu;
 
-  bool isLiked(String id) => _likes.contains(id);
-  bool isDisliked(String id) => _dislikes.contains(id);
-  bool isSeen(String id) => _vu.contains(id);
+  bool isLiked(String filmId) => _likes.contains(filmId);
+  bool isDisliked(String filmId) => _dislikes.contains(filmId);
+  bool isSeen(String filmId) => _vu.contains(filmId);
 
-  void toggleLike(String id) async {
-    final alreadyLiked = _likes.contains(id);
+  Future<void> toggleLike(String filmId) async {
+    print("👉 toggleLike filmId: $filmId");
 
-    if (alreadyLiked) {
-      _likes.remove(id);
-      await _callStatutApi(ApiRoutes.deleteLike, id);
+    if (_likes.contains(filmId)) {
+      // Supprimer le like
+      final success = await _sendFilmId(ApiRoutes.deleteLike, filmId);
+      if (success) _likes.remove(filmId);
     } else {
-      _likes.add(id);
-      _dislikes.remove(id);
-      await _callStatutApi(ApiRoutes.addLike, id);
+      // Ajouter le like
+      final success = await _sendFilmId(ApiRoutes.addLike, filmId);
+      if (success) {
+        _likes.add(filmId);
+        if (_dislikes.contains(filmId)) {
+          await _sendFilmId(ApiRoutes.deleteDislike, filmId);
+          _dislikes.remove(filmId);
+        }
+      }
     }
 
+    print("✅ Likes actuels: $_likes");
     notifyListeners();
   }
 
-  void toggleDislike(String id) async {
-    final alreadyDisliked = _dislikes.contains(id);
+  Future<void> toggleDislike(String filmId) async {
+    print("👉 toggleDislike filmId: $filmId");
 
-    if (alreadyDisliked) {
-      _dislikes.remove(id);
-      await _callStatutApi(ApiRoutes.deleteDislike, id);
+    if (_dislikes.contains(filmId)) {
+      // Supprimer le dislike
+      final success = await _sendFilmId(ApiRoutes.deleteDislike, filmId);
+      if (success) _dislikes.remove(filmId);
     } else {
-      _dislikes.add(id);
-      _likes.remove(id);
-      await _callStatutApi(ApiRoutes.addDislike, id);
+      // Ajouter le dislike
+      final success = await _sendFilmId(ApiRoutes.addDislike, filmId);
+      if (success) {
+        _dislikes.add(filmId);
+        if (_likes.contains(filmId)) {
+          await _sendFilmId(ApiRoutes.deleteLike, filmId);
+          _likes.remove(filmId);
+        }
+      }
     }
 
+    print("✅ Dislikes actuels: $_dislikes");
     notifyListeners();
   }
 
-  void toggleVu(String id) async {
-    final alreadySeen = _vu.contains(id);
+  Future<void> toggleVu(String filmId) async {
+    print("👉 toggleVu filmId: $filmId");
 
-    if (alreadySeen) {
-      _vu.remove(id);
-      await _callStatutApi(ApiRoutes.deleteSeenMovie, id);
+    if (_vu.contains(filmId)) {
+      final success = await _sendFilmId(ApiRoutes.deleteSeenMovie, filmId);
+      if (success) _vu.remove(filmId);
     } else {
-      _vu.add(id);
-      await _callStatutApi(ApiRoutes.addSeenMovie, id);
+      final success = await _sendFilmId(ApiRoutes.addSeenMovie, filmId);
+      if (success) _vu.add(filmId);
     }
 
+    print("✅ Films vus actuels: $_vu");
     notifyListeners();
   }
 
-  Future<void> _callStatutApi(String url, String filmId) async {
+  Future<bool> _sendFilmId(String url, String filmId) async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('jwt_token');
-    if (token == null) return;
+    if (token == null) return false;
+
+    print("📤 Envoi à $url avec filmId: $filmId");
 
     try {
       final response = await http.post(
@@ -74,22 +92,14 @@ class FilmStatutProvider with ChangeNotifier {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
         },
-        body: jsonEncode({"filmId": filmId}),
+        body: jsonEncode({'filmId': filmId}),
       );
 
-      if (response.statusCode != 200) {
-        debugPrint("❌ Statut API error [$url] : ${response.statusCode} — ${response.body}");
-      }
+      print("📥 Réponse ${response.statusCode} : ${response.body}");
+      return response.statusCode == 200;
     } catch (e) {
-      debugPrint("❌ Connexion échouée à $url : $e");
+      print("❌ Exception API : $e");
+      return false;
     }
-  }
-
-  // 🔄 Pour synchroniser depuis le user (optionnel)
-  void setFromUserData(Map<String, dynamic> data) {
-    _likes = Set<String>.from(data["likes"] ?? []);
-    _dislikes = Set<String>.from(data["dislikes"] ?? []);
-    _vu = Set<String>.from(data["movies_seen"] ?? []);
-    notifyListeners();
   }
 }
