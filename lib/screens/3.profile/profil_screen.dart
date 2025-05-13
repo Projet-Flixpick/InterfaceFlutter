@@ -70,9 +70,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Mon Profil'),
-      ),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
           : notConnected
@@ -81,13 +78,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       const Text(
-                        "Vous n'êtes pas connecté.",
+                        "You are not logged in.",
                         style: TextStyle(fontSize: 18),
                       ),
                       const SizedBox(height: 16),
                       ElevatedButton.icon(
                         icon: const Icon(Icons.login),
-                        label: const Text("Se connecter"),
+                        label: const Text("Log In"),
                         onPressed: () {
                           Navigator.of(context).pushReplacement(
                             MaterialPageRoute(
@@ -102,14 +99,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   padding: const EdgeInsets.all(16),
                   children: [
                     ListTile(
-                      title: Text(user?.name ?? "Utilisateur"),
+                      title: Text(user?.name ?? "User"),
                       subtitle: Text(user?.email ?? ""),
                       leading: const Icon(Icons.person),
                     ),
                     const Divider(),
                     ListTile(
                       leading: const Icon(Icons.category),
-                      title: const Text('Mes genres préférés'),
+                      title: const Text('My Favorite Genres'),
                       trailing: const Icon(Icons.arrow_forward_ios),
                       onTap: () {
                         Navigator.push(
@@ -121,7 +118,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                     ListTile(
                       leading: const Icon(Icons.movie),
-                      title: const Text('Mes films likés / vus'),
+                      title: const Text('My Liked / Watched Movies'),
                       trailing: const Icon(Icons.arrow_forward_ios),
                       onTap: () {
                         Navigator.push(
@@ -133,7 +130,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                     ListTile(
                       leading: const Icon(Icons.people),
-                      title: const Text('Mes amis'),
+                      title: const Text('My Friends'),
                       trailing: const Icon(Icons.arrow_forward_ios),
                       onTap: () {
                         Navigator.push(
@@ -145,7 +142,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                     ListTile(
                       leading: const Icon(Icons.settings),
-                      title: const Text('Réglages'),
+                      title: const Text('Settings'),
                       trailing: const Icon(Icons.arrow_forward_ios),
                       onTap: () {
                         Navigator.push(
@@ -158,7 +155,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     const Divider(),
                     ListTile(
                       leading: const Icon(Icons.logout),
-                      title: const Text('Déconnexion'),
+                      title: const Text('Log Out'),
                       onTap: () => _logout(context),
                     ),
                   ],

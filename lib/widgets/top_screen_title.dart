@@ -28,7 +28,7 @@ class TopScreenTitle extends StatelessWidget implements PreferredSizeWidget {
             ),
           ),
         ),
-        const SizedBox(height: 16.0), // Ajoute un espace sous l'AppBar
+        const SizedBox(height: 16.0), // Adds spacing below the AppBar
       ],
     );
   }

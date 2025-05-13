@@ -41,17 +41,54 @@ class FilmDetailScreen extends StatelessWidget {
             ),
             const SizedBox(height: 10),
             Text(
-              'Date de sortie: ${film.releaseDate}',
+              'Release Date: ${film.releaseDate}',
               style: const TextStyle(fontSize: 18),
             ),
+
             const SizedBox(height: 10),
+
+            // Like / Dislike / Seen buttons
+            Consumer<FilmStatutProvider>(
+              builder: (context, statutProvider, _) {
+                final id = film.mongoId;
+                final isLiked = statutProvider.isLiked(id);
+                final isDisliked = statutProvider.isDisliked(id);
+                final isSeen = statutProvider.isSeen(id);
+
+                return Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    IconButton(
+                      icon: Icon(Icons.thumb_up,
+                          color: isLiked ? Colors.green : Colors.grey),
+                      onPressed: () => statutProvider.toggleLike(id, 'true'),
+                      tooltip: "Like",
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.thumb_down,
+                          color: isDisliked ? Colors.red : Colors.grey),
+                      onPressed: () => statutProvider.toggleDislike(id, 'false'),
+                      tooltip: "Dislike",
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.remove_red_eye,
+                          color: isSeen ? Colors.blue : Colors.grey),
+                      onPressed: () => statutProvider.toggleVu(id, 'true'),
+                      tooltip: "Seen",
+                    ),
+                  ],
+                );
+              },
+            ),
+            const SizedBox(height: 10),
+
             Text(
               film.overview,
               style: const TextStyle(fontSize: 16),
             ),
             const SizedBox(height: 20),
 
-            // Genres associés
+            // Associated genres
             Consumer<GenreProvider>(
               builder: (context, genreProvider, _) {
                 return Wrap(
@@ -68,81 +105,10 @@ class FilmDetailScreen extends StatelessWidget {
               },
             ),
 
-            const SizedBox(height: 10),
-
-            // Boutons Like / Dislike / Vu
-            Consumer<FilmStatutProvider>(
-              builder: (context, statutProvider, _) {
-                final id = film.mongoId;
-                final isLiked = statutProvider.isLiked(id);
-                final isDisliked = statutProvider.isDisliked(id);
-                final isSeen = statutProvider.isSeen(id);
-
-                return Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    IconButton(
-                      icon: Icon(Icons.thumb_up,
-                          color: isLiked ? Colors.green : Colors.grey),
-                      onPressed: () => statutProvider.toggleLike(id),
-                      tooltip: "J'aime",
-                    ),
-                    IconButton(
-                      icon: Icon(Icons.thumb_down,
-                          color: isDisliked ? Colors.red : Colors.grey),
-                      onPressed: () => statutProvider.toggleDislike(id),
-                      tooltip: "Je n'aime pas",
-                    ),
-                    IconButton(
-                      icon: Icon(Icons.remove_red_eye,
-                          color: isSeen ? Colors.blue : Colors.grey),
-                      onPressed: () => statutProvider.toggleVu(id),
-                      tooltip: "Vu",
-                    ),
-                  ],
-                );
-              },
-            ),
-
-            const SizedBox(height: 20),
-
-            // 🎥 Où louer ou acheter
-            if (providers != null) ...[
-              const Text(
-                'Où acheter ou louer le film ?',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 10),
-              if (providers['buy'] != null && providers['buy'].isNotEmpty) ...[
-                const Text('Acheter :', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                Column(
-                  children: providers['buy']?.map<Widget>((provider) {
-                    return ListTile(
-                      title: Text(provider),
-                      trailing: const Icon(Icons.link),
-                      onTap: () => _launchURL(providers['link']),
-                    );
-                  }).toList() ?? [],
-                ),
-              ],
-              if (providers['rent'] != null && providers['rent'].isNotEmpty) ...[
-                const Text('Louer :', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                Column(
-                  children: providers['rent']?.map<Widget>((provider) {
-                    return ListTile(
-                      title: Text(provider),
-                      trailing: const Icon(Icons.link),
-                      onTap: () => _launchURL(providers['link']),
-                    );
-                  }).toList() ?? [],
-                ),
-              ],
-            ],
-
             const SizedBox(height: 20),
 
             const Text(
-              'Acteurs principaux',
+              'Main Cast',
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 10),
@@ -166,7 +132,7 @@ class FilmDetailScreen extends StatelessWidget {
                 }).toList(),
               ),
             ] else ...[
-              const Text('Aucun acteur disponible'),
+              const Text('No cast available'),
             ],
           ],
         ),
@@ -178,7 +144,7 @@ class FilmDetailScreen extends StatelessWidget {
     if (await canLaunch(url)) {
       await launch(url);
     } else {
-      throw 'Impossible d\'ouvrir l\'URL : $url';
+      throw 'Could not launch URL: $url';
     }
   }
 }

@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:provider/provider.dart';
+
 import '../1.home/home_screen.dart';
 import 'register_screen.dart';
 import 'package:flutter_application_1/screens/4.autre/choisir_genres_screen.dart';
 import 'package:flutter_application_1/services/APIgo/auth_api_go.dart';
+import 'package:flutter_application_1/providers/auth_provider.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -39,7 +42,7 @@ class _LoginScreenState extends State<LoginScreen> {
     if (email.isEmpty || password.isEmpty) {
       setState(() {
         _isLoading = false;
-        _errorMessage = "Veuillez remplir tous les champs.";
+        _errorMessage = "Please fill in all fields.";
       });
       return;
     }
@@ -52,12 +55,13 @@ class _LoginScreenState extends State<LoginScreen> {
       });
     } else if (response != null && response.containsKey("token")) {
       final token = response["token"];
-      final user = response["user"]; // doit être retourné par l'API !
+      final user = response["user"]; 
+
+      Provider.of<AuthProvider>(context, listen: false).setToken(token);
 
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString("jwt_token", token);
 
-      // Stockage infos utilisateur
       if (user != null) {
         await prefs.setString("email", user["email"] ?? "");
         await prefs.setString("firstname", user["firstname"] ?? "");
@@ -65,7 +69,7 @@ class _LoginScreenState extends State<LoginScreen> {
       }
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Connexion réussie !")),
+        const SnackBar(content: Text("Login successful!")),
       );
 
       Navigator.pushReplacement(
@@ -73,7 +77,6 @@ class _LoginScreenState extends State<LoginScreen> {
         MaterialPageRoute(builder: (context) => const HomeScreen()),
       );
     }
-
 
     setState(() {
       _isLoading = false;
@@ -84,7 +87,7 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
-        appBar: AppBar(title: const Text("Connecte-toi !")),
+        appBar: AppBar(title: const Text("Log in!")),
         body: Padding(
           padding: const EdgeInsets.all(16.0),
           child: SingleChildScrollView(
@@ -117,7 +120,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 TextField(
                   controller: _passwordController,
                   obscureText: true,
-                  decoration: const InputDecoration(labelText: "Mot de passe"),
+                  decoration: const InputDecoration(labelText: "Password"),
                 ),
                 const SizedBox(height: 20),
 
@@ -132,14 +135,14 @@ class _LoginScreenState extends State<LoginScreen> {
                   onPressed: _isLoading ? null : _onLogin,
                   child: _isLoading
                       ? const CircularProgressIndicator(color: Colors.white)
-                      : const Text("Se connecter"),
+                      : const Text("Log in"),
                 ),
                 const SizedBox(height: 20),
 
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Text("Pas encore de compte ? "),
+                    const Text("Don't have an account yet? "),
                     TextButton(
                       onPressed: () async {
                         final result = await Navigator.push(
@@ -147,14 +150,13 @@ class _LoginScreenState extends State<LoginScreen> {
                           MaterialPageRoute(builder: (context) => const RegisterScreen()),
                         );
 
-                        // Si un email est retourné → on le pré-remplit
                         if (result != null && result is String) {
                           setState(() {
                             _emailController.text = result;
                           });
                         }
                       },
-                      child: const Text("S'inscrire"),
+                      child: const Text("Sign up"),
                     ),
                   ],
                 ),
@@ -172,7 +174,6 @@ class _LoginScreenState extends State<LoginScreen> {
                     style: TextStyle(color: Colors.blue, fontSize: 16),
                   ),
                 ),
-
               ],
             ),
           ),

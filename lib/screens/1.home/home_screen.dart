@@ -32,10 +32,10 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    _loadFilms(); // Charger les films au démarrage
+    _loadFilms(); // Load films on startup
   }
 
-  // Charger les films depuis l'API
+  // Load films from the API
   Future<void> _loadFilms() async {
     final authApi = AuthApiNode();
     final filmsData = await authApi.getMovies(page: currentPage);
@@ -45,24 +45,23 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
-
-  // Liste des écrans
+  // List of screens
   final List<Widget> _screens = [
-    HomeContent(), // Affichage du contenu principal
+    HomeContent(), // Main content display
     TopsScreen(),
     RecommendationsScreen(),
     ProfileScreen(),
   ];
 
-  // Liste des titres des écrans
+  // List of screen titles
   final List<String> _titles = [
-    "Home", 
-    "Top Films", 
-    "Recommendations de films", 
-    "Profil Utilisateur"
+    "Home",
+    "Top Films",
+    "Movie Recommendations",
+    "My Profile"
   ];
 
-  // Fonction pour changer de page
+  // Function to switch screens
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
@@ -72,11 +71,11 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // Utilisation de TopScreenTitle pour afficher le titre dynamique
+      // Using TopScreenTitle to display dynamic title
       appBar: TopScreenTitle(
-        title: _titles[_selectedIndex], // Le titre dynamique basé sur l'écran sélectionné
+        title: _titles[_selectedIndex], // Dynamic title based on selected screen
       ),
-      body: _screens[_selectedIndex], // Afficher l'écran sélectionné
+      body: _screens[_selectedIndex], // Display the selected screen
       bottomNavigationBar: BottomNavBar(
         selectedIndex: _selectedIndex,
         onItemTapped: _onItemTapped,
@@ -85,7 +84,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-// **Contenu principal avec la liste des films**
+// **Main content with film list**
 class HomeContent extends StatefulWidget {
   @override
   _HomeContentState createState() => _HomeContentState();
@@ -102,7 +101,7 @@ class _HomeContentState extends State<HomeContent> {
     _loadFilms();
   }
 
-  // Charger les films depuis l'API
+  // Load films from the API
   Future<void> _loadFilms() async {
     final authApi = AuthApiNode();
     final filmsData = await authApi.getMovies(page: currentPage);
@@ -112,20 +111,20 @@ class _HomeContentState extends State<HomeContent> {
     });
   }
 
-  // Fonction pour charger plus de films
+  // Function to load more films
   Future<void> _loadMoreFilms() async {
     if (isLoading) return;
     setState(() {
       isLoading = true;
     });
 
-    // Charger les films de la page suivante
+    // Load next page of films
     final authApi = AuthApiNode();
     final filmsData = await authApi.getMovies(page: currentPage);
 
     setState(() {
       films.addAll(filmsData.take(20).map((filmJson) => Film.fromJson(filmJson)).toList());
-      currentPage++; // Incrémenter la page
+      currentPage++;
       isLoading = false;
     });
   }
@@ -138,15 +137,15 @@ class _HomeContentState extends State<HomeContent> {
         child: Column(
           children: [
             const Text(
-              'Films populaires',
+              'Popular Movies',
               style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
               ),
             ),
             FilmsList(
-              films: films, // Passer la liste des films
-              loadMoreFilms: _loadMoreFilms, // Passer la fonction pour charger plus de films
+              films: films, // Pass film list
+              loadMoreFilms: _loadMoreFilms, // Pass function to load more films
             ),
           ],
         ),

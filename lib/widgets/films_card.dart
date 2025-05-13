@@ -11,7 +11,7 @@ class FilmsCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        // Lorsque le film est cliqué, on navigue vers la page de détails
+        // When a film is tapped, navigate to its detail page
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -21,14 +21,14 @@ class FilmsCard extends StatelessWidget {
       },
       child: Container(
         margin: const EdgeInsets.symmetric(
-            horizontal: 8.0), // Ajouter de l'espace entre les films
+            horizontal: 8.0), // Add spacing between films
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(10),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            // Affiche l'affiche du film
+            // Display the film poster
             Image.network(
               film.posterPath,
               width: 100,
@@ -36,7 +36,7 @@ class FilmsCard extends StatelessWidget {
               fit: BoxFit.cover,
             ),
             const SizedBox(height: 5),
-            // Titre et année du film
+            // Film title and release year
             SizedBox(
               width: 100,
               child: Column(
@@ -54,7 +54,7 @@ class FilmsCard extends StatelessWidget {
                   Text(
                     film.releaseDate.length >= 4
                         ? film.releaseDate.substring(0, 4)
-                        : 'Inconnue',
+                        : 'Unknown',
                     textAlign: TextAlign.center,
                   ),
                 ],

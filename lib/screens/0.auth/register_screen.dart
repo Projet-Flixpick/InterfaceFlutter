@@ -48,7 +48,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     if (email.isEmpty || password.isEmpty || name.isEmpty || firstname.isEmpty || dob.isEmpty) {
       setState(() {
         _isLoading = false;
-        _errorMessage = "Veuillez remplir tous les champs.";
+        _errorMessage = "Please fill in all fields.";
       });
       return;
     }
@@ -56,7 +56,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     if (password != confirmPassword) {
       setState(() {
         _isLoading = false;
-        _errorMessage = "Les mots de passe ne correspondent pas.";
+        _errorMessage = "Passwords do not match.";
       });
       return;
     }
@@ -64,7 +64,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     if (!_isAccepted) {
       setState(() {
         _isLoading = false;
-        _errorMessage = "Vous devez accepter les conditions générales.";
+        _errorMessage = "You must accept the terms and conditions.";
       });
       return;
     }
@@ -73,7 +73,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
     if (response == null) {
       setState(() {
-        _errorMessage = "Erreur inattendue. Veuillez réessayer.";
+        _errorMessage = "Unexpected error. Please try again.";
       });
     } else if (response.containsKey("error")) {
       setState(() {
@@ -81,17 +81,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
       });
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Inscription réussie !")),
+        const SnackBar(content: Text("Registration successful!")),
       );
-      Navigator.pop(context, email); // retourne aussi l'e-mail
+      Navigator.pop(context, email);
     }
-
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("S'inscrire")),
+      appBar: AppBar(title: const Text("Sign Up")),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: SingleChildScrollView(
@@ -120,14 +119,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
               ),
               const SizedBox(height: 20),
 
-              // Champs utilisateur
+              // User fields
               TextField(
                 controller: _firstnameController,
-                decoration: const InputDecoration(labelText: "Prénom"),
+                decoration: const InputDecoration(labelText: "First Name"),
               ),
               TextField(
                 controller: _nameController,
-                decoration: const InputDecoration(labelText: "Nom"),
+                decoration: const InputDecoration(labelText: "Last Name"),
               ),
               TextField(
                 controller: _emailController,
@@ -136,18 +135,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
               TextField(
                 controller: _passwordController,
                 obscureText: true,
-                decoration: const InputDecoration(labelText: "Mot de passe"),
+                decoration: const InputDecoration(labelText: "Password"),
               ),
               TextField(
                 controller: _confirmPasswordController,
                 obscureText: true,
-                decoration: const InputDecoration(labelText: "Confirmer le mot de passe"),
+                decoration: const InputDecoration(labelText: "Confirm Password"),
               ),
               TextField(
                 controller: _dobController,
                 decoration: const InputDecoration(
-                  labelText: "Date de naissance",
-                  hintText: "JJ/MM/AAAA",
+                  labelText: "Date of Birth",
+                  hintText: "DD/MM/YYYY",
                 ),
                 keyboardType: TextInputType.datetime,
               ),
@@ -167,7 +166,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     child: Wrap(
                       children: const [
                         Text(
-                          "J'ai lu et j'accepte les conditions générales et la politique de confidentialité.",
+                          "I have read and accept the terms and privacy policy.",
                           style: TextStyle(fontSize: 14),
                         ),
                       ],
@@ -187,7 +186,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 onPressed: _isLoading ? null : _onRegister,
                 child: _isLoading
                     ? const CircularProgressIndicator(color: Colors.white)
-                    : const Text("S'inscrire"),
+                    : const Text("Sign Up"),
               ),
             ],
           ),

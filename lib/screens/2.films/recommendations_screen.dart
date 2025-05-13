@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/services/APINode/auth_api_node.dart'; // Assure-toi que ton API est bien importée
+import 'package:flutter_application_1/services/APINode/auth_api_node.dart';
 import '../../models/film_model.dart';
 import '../../widgets/films_list.dart';
 import '../../widgets/titre_section.dart';
@@ -29,14 +29,14 @@ class _RecommendationsScreenState extends State<RecommendationsScreen> {
   @override
   void initState() {
     super.initState();
-    _loadFilms(); // Charger les films via l'API au démarrage
+    _loadFilms(); // Load movies from the API on startup
   }
 
-  // Charger les films depuis l'API
+  // Load movies from the API
   Future<void> _loadFilms() async {
     final authApi = AuthApiNode();
 
-    // Charger les films pour chaque catégorie
+    // Load movies for each category
     final recommendedFilmsData = await authApi.getMovies(page: currentPageRecommended);
     final genreFilmsData = await authApi.getMovies(page: currentPageGenre);
     final ifwatchedFilmsData = await authApi.getMovies(page: currentPageIfwatched);
@@ -53,7 +53,7 @@ class _RecommendationsScreenState extends State<RecommendationsScreen> {
     });
   }
 
-  // Fonction de pagination pour charger plus de films dans chaque catégorie
+  // Pagination function to load more films in each category
   Future<void> _loadMoreFilms(String section) async {
     if (isLoading) return;
 
@@ -98,7 +98,7 @@ class _RecommendationsScreenState extends State<RecommendationsScreen> {
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 15.0),
                   child: TitreSection(
-                    title: "Films selon ton genre préféré",
+                    title: "Movies Based on Your Favorite Genre",
                     sectionColor: Colors.orangeAccent,
                   ),
                 ),
@@ -109,7 +109,7 @@ class _RecommendationsScreenState extends State<RecommendationsScreen> {
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 15.0),
                   child: TitreSection(
-                    title: "Suggestions selon tes films vus",
+                    title: "Suggestions Based on Your Watched Movies",
                     sectionColor: Colors.green,
                   ),
                 ),

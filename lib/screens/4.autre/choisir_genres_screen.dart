@@ -35,7 +35,7 @@ class _ChoisirGenresScreenState extends State<ChoisirGenresScreen> {
     });
   }
 
-  Future<void> continuer() async {
+  Future<void> continueSelection() async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('jwt_token');
 
@@ -58,12 +58,12 @@ class _ChoisirGenresScreenState extends State<ChoisirGenresScreen> {
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Erreur API : ${response.body}")),
+          SnackBar(content: Text("API error: ${response.body}")),
         );
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Erreur de connexion.")),
+        const SnackBar(content: Text("Connection error.")),
       );
     }
   }
@@ -125,7 +125,7 @@ class _ChoisirGenresScreenState extends State<ChoisirGenresScreen> {
     final genres = genreProvider.genres;
 
     return Scaffold(
-      appBar: TopScreenTitle(title: 'Choisi tes genres'),
+      appBar: TopScreenTitle(title: 'Choose Your Genres'),
       body: genres.isEmpty
           ? const Center(child: CircularProgressIndicator())
           : Padding(
@@ -134,7 +134,7 @@ class _ChoisirGenresScreenState extends State<ChoisirGenresScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const TitreSection(
-                    title: 'Choisi tes genres préférés',
+                    title: 'Select your favorite genres',
                     sectionColor: Colors.deepOrange,
                   ),
                   const SizedBox(height: 16),
@@ -201,11 +201,11 @@ class _ChoisirGenresScreenState extends State<ChoisirGenresScreen> {
         onItemTapped: _onItemTapped,
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: continuer,
+        onPressed: continueSelection,
         backgroundColor: Colors.deepOrange,
         icon: const Icon(Icons.check, color: Colors.white),
         label: const Text(
-          'Continuer',
+          'Continue',
           style: TextStyle(color: Colors.white),
         ),
       ),

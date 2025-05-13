@@ -6,8 +6,8 @@ class UserFilmsStatutScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Films likés")),
-      body: const Center(child: Text("Liste des films que vous avez likés")),
+      appBar: AppBar(title: const Text("Liked Movies")),
+      body: const Center(child: Text("List of movies you have liked")),
     );
   }
 }

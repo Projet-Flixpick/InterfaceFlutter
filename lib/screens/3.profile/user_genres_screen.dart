@@ -7,7 +7,7 @@ class UserGenresScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Mes genres")),
+      appBar: AppBar(title: const Text("My Genres")),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -20,14 +20,14 @@ class UserGenresScreen extends StatelessWidget {
                 );
               },
               icon: const Icon(Icons.edit),
-              label: const Text("Modifier mes genres"),
+              label: const Text("Edit My Genres"),
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               ),
             ),
             const SizedBox(height: 24),
             const Center(
-              child: Text("Liste des genres préférés"),
+              child: Text("List of preferred genres"),
             ),
           ],
         ),

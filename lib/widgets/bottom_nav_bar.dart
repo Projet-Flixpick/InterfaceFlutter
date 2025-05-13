@@ -1,4 +1,3 @@
-// bottom_nav_bar.dart
 import 'package:flutter/material.dart';
 
 class BottomNavBar extends StatelessWidget {
@@ -14,8 +13,8 @@ class BottomNavBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BottomNavigationBar(
-      currentIndex: selectedIndex,   // Affiche l'index sélectionné
-      onTap: onItemTapped,           // Appelle la fonction pour changer de page
+      currentIndex: selectedIndex,           // Shows the selected index
+      onTap: onItemTapped,                   // Calls the function to switch tabs
       selectedItemColor: Colors.blue,
       unselectedItemColor: Colors.grey,
       showUnselectedLabels: true,
@@ -26,15 +25,15 @@ class BottomNavBar extends StatelessWidget {
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.trending_up),
-          label: "Tops",
+          label: "Top Picks",
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.recommend),
-          label: "Pour toi",
+          label: "For You",
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.person),
-          label: "Profil",
+          label: "Profile",
         ),
       ],
     );
