@@ -6,7 +6,9 @@ import '../1.home/home_screen.dart';
 import 'register_screen.dart';
 import 'package:flutter_application_1/screens/4.autre/choisir_genres_screen.dart';
 import 'package:flutter_application_1/services/APIgo/auth_api_go.dart';
+import 'package:flutter_application_1/services/synchroniser_remote2local.dart';
 import 'package:flutter_application_1/providers/auth_provider.dart';
+import 'package:flutter_application_1/providers/film_statut_provider.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -52,21 +54,39 @@ class _LoginScreenState extends State<LoginScreen> {
     if (response != null && response.containsKey("error")) {
       setState(() {
         _errorMessage = response["error"];
+        _isLoading = false;
       });
-    } else if (response != null && response.containsKey("token")) {
+      return;
+    }
+
+    if (response != null && response.containsKey("token")) {
       final token = response["token"];
-      final user = response["user"]; 
+      final user = response["user"];
 
+      print("🎟️ Token JWT reçu : $token");
+
+      if (token == null || token.split('.').length != 3) {
+        print("❌ Token mal formé !");
+        setState(() {
+          _errorMessage = "Erreur : token JWT invalide.";
+          _isLoading = false;
+        });
+        return;
+      }
+
+      print("✅ Token JWT bien formé.");
+
+      // Enregistrer le token
       Provider.of<AuthProvider>(context, listen: false).setToken(token);
-
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString("jwt_token", token);
 
-      if (user != null) {
-        await prefs.setString("email", user["email"] ?? "");
-        await prefs.setString("firstname", user["firstname"] ?? "");
-        await prefs.setString("name", user["name"] ?? "");
-      }
+      // Lancer la synchronisation depuis le serveur
+      await SynchroniserRemote2Local.run(
+        token: token,
+        authProvider: Provider.of<AuthProvider>(context, listen: false),
+        filmProvider: Provider.of<FilmStatutProvider>(context, listen: false),
+      );
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Login successful!")),
@@ -147,7 +167,8 @@ class _LoginScreenState extends State<LoginScreen> {
                       onPressed: () async {
                         final result = await Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => const RegisterScreen()),
+                          MaterialPageRoute(
+                              builder: (context) => const RegisterScreen()),
                         );
 
                         if (result != null && result is String) {

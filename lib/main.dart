@@ -7,12 +7,12 @@ import 'providers/genre_provider.dart';
 import 'providers/film_statut_provider.dart';
 import 'providers/auth_provider.dart';
 
-// Routes
-import 'app_routes.dart';
+// Screens
+import 'screens/0.auth/splash_screen.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]); // Lock to portrait mode
+  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
   runApp(const MyApp());
 }
 
@@ -38,8 +38,7 @@ class MyApp extends StatelessWidget {
             foregroundColor: Colors.white,
           ),
         ),
-        initialRoute: '/',
-        routes: appRoutes, // Centralized routes from app_routes.dart
+        home: const SplashScreen(),
       ),
     );
   }

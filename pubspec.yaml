@@ -28,3 +28,5 @@ flutter:
   assets:
     - assets/images/Logo_FlixPick.png
     - assets/images/icone_film.jpg
+    - assets/images/Logo_Popcorn_Solo.png
+    - assets/images/Logo_Main_Solo.png

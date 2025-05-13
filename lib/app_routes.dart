@@ -10,18 +10,13 @@ import 'screens/3.profile/user_genres_screen.dart';
 import 'screens/3.profile/user_films_statut_screen.dart';
 import 'screens/3.profile/user_amis_screen.dart';
 
-// Add more screens as needed
-
 final Map<String, WidgetBuilder> appRoutes = {
-  '/': (context) => const LoginScreen(),
   '/home': (context) => const HomeScreen(),
-  '/profile': (context) => const ProfileScreen(),
-  '/select-genres': (context) => const ChoisirGenresScreen(),
   '/login': (context) => const LoginScreen(),
   '/register': (context) => const RegisterScreen(),
+  '/select-genres': (context) => const ChoisirGenresScreen(),
+  '/profile': (context) => const ProfileScreen(),
   '/my-genres': (context) => const UserGenresScreen(),
   '/liked-movies': (context) => const UserFilmsStatutScreen(),
   '/my-friends': (context) => const UserAmisScreen(),
-
-  // Add additional routes here
 };

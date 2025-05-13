@@ -5,6 +5,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../models/film_model.dart';
 import '../../providers/film_statut_provider.dart';
 import '../../providers/genre_provider.dart';
+import '../../providers/auth_provider.dart';
 
 class FilmDetailScreen extends StatelessWidget {
   final Film film;
@@ -44,16 +45,29 @@ class FilmDetailScreen extends StatelessWidget {
               'Release Date: ${film.releaseDate}',
               style: const TextStyle(fontSize: 18),
             ),
-
             const SizedBox(height: 10),
 
             // Like / Dislike / Seen buttons
-            Consumer<FilmStatutProvider>(
-              builder: (context, statutProvider, _) {
+            Consumer2<FilmStatutProvider, AuthProvider>(
+              builder: (context, statutProvider, authProvider, _) {
                 final id = film.mongoId;
                 final isLiked = statutProvider.isLiked(id);
                 final isDisliked = statutProvider.isDisliked(id);
                 final isSeen = statutProvider.isSeen(id);
+                final token = authProvider.token;
+
+                void handleAction(Function(String, String) action) {
+                  if (token != null && token.split('.').length == 3) {
+                    action(id, token);
+                  } else {
+                    print("❌ Token invalide ou manquant");
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text("Erreur : utilisateur non connecté."),
+                      ),
+                    );
+                  }
+                }
 
                 return Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -61,25 +75,28 @@ class FilmDetailScreen extends StatelessWidget {
                     IconButton(
                       icon: Icon(Icons.thumb_up,
                           color: isLiked ? Colors.green : Colors.grey),
-                      onPressed: () => statutProvider.toggleLike(id, 'true'),
+                      onPressed: () =>
+                          handleAction(statutProvider.toggleLike),
                       tooltip: "Like",
                     ),
                     IconButton(
                       icon: Icon(Icons.thumb_down,
                           color: isDisliked ? Colors.red : Colors.grey),
-                      onPressed: () => statutProvider.toggleDislike(id, 'false'),
+                      onPressed: () =>
+                          handleAction(statutProvider.toggleDislike),
                       tooltip: "Dislike",
                     ),
                     IconButton(
                       icon: Icon(Icons.remove_red_eye,
                           color: isSeen ? Colors.blue : Colors.grey),
-                      onPressed: () => statutProvider.toggleVu(id, 'true'),
+                      onPressed: () => handleAction(statutProvider.toggleVu),
                       tooltip: "Seen",
                     ),
                   ],
                 );
               },
             ),
+
             const SizedBox(height: 10),
 
             Text(
@@ -94,7 +111,9 @@ class FilmDetailScreen extends StatelessWidget {
                 return Wrap(
                   spacing: 6,
                   children: film.genres.map((genreIdOrName) {
-                    final genreName = genreProvider.getGenreNameById(int.tryParse(genreIdOrName) ?? -1);
+                    final genreName = genreProvider.getGenreNameById(
+                      int.tryParse(genreIdOrName) ?? -1,
+                    );
                     return Chip(
                       label: Text(genreName),
                       visualDensity: VisualDensity.compact,
@@ -122,8 +141,10 @@ class FilmDetailScreen extends StatelessWidget {
                       CircleAvatar(
                         radius: 30,
                         backgroundImage: actor.profilePath != null
-                            ? NetworkImage('https://image.tmdb.org/t/p/w500${actor.profilePath}')
-                            : const NetworkImage('https://via.placeholder.com/150'),
+                            ? NetworkImage(
+                                'https://image.tmdb.org/t/p/w500${actor.profilePath}')
+                            : const NetworkImage(
+                                'https://via.placeholder.com/150'),
                       ),
                       const SizedBox(height: 5),
                       Text(actor.name, style: const TextStyle(fontSize: 16)),
