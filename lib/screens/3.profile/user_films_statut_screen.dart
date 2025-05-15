@@ -8,49 +8,48 @@ class UserFilmsStatutScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final filmProvider = Provider.of<FilmStatutProvider>(context);
-
     return Scaffold(
-      appBar: AppBar(title: const Text("Mes Films")),
+      appBar: AppBar(title: const Text("My Movies")),
       body: Padding(
         padding: const EdgeInsets.all(12.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
-              "👍 Films Likés",
+              "👍 Liked Movies",
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             Expanded(
               child: filmProvider.likedFilms.isEmpty
-                  ? const Text("Aucun film liké.")
+                  ? const Text("No liked movies.")
                   : ListView.builder(
                       itemCount: filmProvider.likedFilms.length,
                       itemBuilder: (context, index) {
                         final filmId = filmProvider.likedFilms[index];
                         return ListTile(
                           leading: const Icon(Icons.thumb_up, color: Colors.green),
-                          title: Text("Film ID : $filmId"),
+                          title: Text("Film ID: $filmId"),
                         );
                       },
                     ),
             ),
             const SizedBox(height: 20),
             const Text(
-              "👁️ Films Vus",
+              "👁️ Watched Movies",
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             Expanded(
               child: filmProvider.seenFilms.isEmpty
-                  ? const Text("Aucun film vu.")
+                  ? const Text("No watched movies.")
                   : ListView.builder(
                       itemCount: filmProvider.seenFilms.length,
                       itemBuilder: (context, index) {
                         final filmId = filmProvider.seenFilms[index];
                         return ListTile(
                           leading: const Icon(Icons.remove_red_eye, color: Colors.blue),
-                          title: Text("Film ID : $filmId"),
+                          title: Text("Film ID: $filmId"),
                         );
                       },
                     ),

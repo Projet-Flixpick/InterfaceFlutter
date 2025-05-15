@@ -21,6 +21,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final AuthApiGo _authApi = AuthApiGo();
+  final _formKey = GlobalKey<FormState>();
 
   bool _isLoading = false;
   String? _errorMessage;
@@ -32,7 +33,26 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
+  String? validateEmail(String value) {
+    final emailRegex = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');
+    if (!emailRegex.hasMatch(value)) {
+      return 'Invalid email address.';
+    }
+    return null;
+  }
+
+  String? validatePassword(String value) {
+    if (value.length < 6) {
+      return 'Password must be at least 6 characters long.';
+    }
+    return null;
+  }
+
   Future<void> _onLogin() async {
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+
     setState(() {
       _isLoading = true;
       _errorMessage = null;
@@ -40,14 +60,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
     final String email = _emailController.text.trim();
     final String password = _passwordController.text.trim();
-
-    if (email.isEmpty || password.isEmpty) {
-      setState(() {
-        _isLoading = false;
-        _errorMessage = "Please fill in all fields.";
-      });
-      return;
-    }
 
     final response = await _authApi.login(email, password);
 
@@ -76,12 +88,10 @@ class _LoginScreenState extends State<LoginScreen> {
 
       print("✅ Token JWT bien formé.");
 
-      // Enregistrer le token
       Provider.of<AuthProvider>(context, listen: false).setToken(token);
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString("jwt_token", token);
 
-      // Lancer la synchronisation depuis le serveur
       await SynchroniserRemote2Local.run(
         token: token,
         authProvider: Provider.of<AuthProvider>(context, listen: false),
@@ -89,7 +99,7 @@ class _LoginScreenState extends State<LoginScreen> {
       );
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Login successful!")),
+        const SnackBar(content: Text("Welcome on FlixPick !")),
       );
 
       Navigator.pushReplacement(
@@ -111,91 +121,77 @@ class _LoginScreenState extends State<LoginScreen> {
         body: Padding(
           padding: const EdgeInsets.all(16.0),
           child: SingleChildScrollView(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  "FlixPick",
-                  style: TextStyle(
-                    fontSize: 40,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.redAccent,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 20),
-                Image.asset(
-                  'assets/images/Logo_FlixPick.png',
-                  height: 200,
-                  width: 200,
-                ),
-                const SizedBox(height: 20),
-
-                TextField(
-                  controller: _emailController,
-                  decoration: const InputDecoration(labelText: "Email"),
-                ),
-                const SizedBox(height: 10),
-
-                TextField(
-                  controller: _passwordController,
-                  obscureText: true,
-                  decoration: const InputDecoration(labelText: "Password"),
-                ),
-                const SizedBox(height: 20),
-
-                if (_errorMessage != null)
+            child: Form(
+              key: _formKey,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
                   Text(
-                    _errorMessage!,
-                    style: const TextStyle(color: Colors.red, fontSize: 14),
-                  ),
-                const SizedBox(height: 10),
-
-                ElevatedButton(
-                  onPressed: _isLoading ? null : _onLogin,
-                  child: _isLoading
-                      ? const CircularProgressIndicator(color: Colors.white)
-                      : const Text("Log in"),
-                ),
-                const SizedBox(height: 20),
-
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Text("Don't have an account yet? "),
-                    TextButton(
-                      onPressed: () async {
-                        final result = await Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => const RegisterScreen()),
-                        );
-
-                        if (result != null && result is String) {
-                          setState(() {
-                            _emailController.text = result;
-                          });
-                        }
-                      },
-                      child: const Text("Sign up"),
+                    "FlixPick",
+                    style: TextStyle(
+                      fontSize: 40,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.redAccent,
                     ),
-                  ],
-                ),
-
-                TextButton(
-                  onPressed: () {
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const ChoisirGenresScreen()),
-                    );
-                  },
-                  child: const Text(
-                    "Skip",
-                    style: TextStyle(color: Colors.blue, fontSize: 16),
+                    textAlign: TextAlign.center,
                   ),
-                ),
-              ],
+                  const SizedBox(height: 20),
+                  Image.asset(
+                    'assets/images/Logo_FlixPick.png',
+                    height: 200,
+                    width: 200,
+                  ),
+                  const SizedBox(height: 20),
+                  TextFormField(
+                    controller: _emailController,
+                    decoration: const InputDecoration(labelText: "Email"),
+                    keyboardType: TextInputType.emailAddress,
+                    validator: (value) => validateEmail(value ?? ""),
+                  ),
+                  const SizedBox(height: 10),
+                  TextFormField(
+                    controller: _passwordController,
+                    obscureText: true,
+                    decoration: const InputDecoration(labelText: "Password"),
+                    validator: (value) => validatePassword(value ?? ""),
+                  ),
+                  const SizedBox(height: 20),
+                  if (_errorMessage != null)
+                    Text(
+                      _errorMessage!,
+                      style: const TextStyle(color: Colors.red, fontSize: 14),
+                    ),
+                  const SizedBox(height: 10),
+                  ElevatedButton(
+                    onPressed: _isLoading ? null : _onLogin,
+                    child: _isLoading
+                        ? const CircularProgressIndicator(color: Colors.white)
+                        : const Text("Log in"),
+                  ),
+                  const SizedBox(height: 20),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text("Don't have an account yet? "),
+                      TextButton(
+                        onPressed: () async {
+                          final result = await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => const RegisterScreen()),
+                          );
+                          if (result != null && result is String) {
+                            setState(() {
+                              _emailController.text = result;
+                            });
+                          }
+                        },
+                        child: const Text("Sign up"),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
         ),

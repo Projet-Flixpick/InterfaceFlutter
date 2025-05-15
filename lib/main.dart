@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 
 // Providers
@@ -9,6 +10,7 @@ import 'providers/auth_provider.dart';
 
 // Screens
 import 'screens/0.auth/splash_screen.dart';
+import 'theme/theme.dart'; // Ton fichier de thème personnalisé
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -30,14 +32,20 @@ class MyApp extends StatelessWidget {
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
         title: 'FlixPick',
-        theme: ThemeData(
-          primarySwatch: Colors.blue,
-          scaffoldBackgroundColor: Colors.white,
-          appBarTheme: const AppBarTheme(
-            backgroundColor: Colors.redAccent,
-            foregroundColor: Colors.white,
-          ),
-        ),
+
+        // ✅ Utilisation du thème global défini dans theme.dart
+        theme: flixPickTheme,
+
+        // ✅ Localisations
+        localizationsDelegates: const [
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        supportedLocales: const [
+          Locale('en'), // Tu peux ajouter 'fr' ici si besoin
+        ],
+
         home: const SplashScreen(),
       ),
     );

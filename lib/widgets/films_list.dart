@@ -57,7 +57,7 @@ class _FilmsListState extends State<FilmsList> {
             return const Center(child: CircularProgressIndicator()); // Show loader
           } else {
             return Padding(
-              padding: const EdgeInsets.only(right: 5), // Space between film cards
+              padding: const EdgeInsets.only(right: 2), // Space between film cards
               child: FilmsCard(film: widget.films[index]),
             );
           }

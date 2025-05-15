@@ -133,24 +133,49 @@ class FilmDetailScreen extends StatelessWidget {
             const SizedBox(height: 10),
 
             if (cast.isNotEmpty) ...[
-              Wrap(
-                spacing: 10,
-                children: cast.map<Widget>((actor) {
+              GridView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 3,
+                  crossAxisSpacing: 10,
+                  mainAxisSpacing: 10,
+                  childAspectRatio: 0.7,
+                ),
+                itemCount: cast.length,
+                itemBuilder: (context, index) {
+                  final actor = cast[index];
+                  final profileUrl = actor.profilePath != null
+                      ? 'https://image.tmdb.org/t/p/w500${actor.profilePath}'
+                      : 'https://via.placeholder.com/150';
+
                   return Column(
                     children: [
                       CircleAvatar(
-                        radius: 30,
-                        backgroundImage: actor.profilePath != null
-                            ? NetworkImage(
-                                'https://image.tmdb.org/t/p/w500${actor.profilePath}')
-                            : const NetworkImage(
-                                'https://via.placeholder.com/150'),
+                        radius: 40,
+                        backgroundImage: NetworkImage(profileUrl),
                       ),
                       const SizedBox(height: 5),
-                      Text(actor.name, style: const TextStyle(fontSize: 16)),
+                      Text(
+                        actor.name,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 14,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        actor.character,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey,
+                        ),
+                      ),
                     ],
                   );
-                }).toList(),
+                },
               ),
             ] else ...[
               const Text('No cast available'),

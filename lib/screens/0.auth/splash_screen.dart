@@ -27,7 +27,7 @@ class _SplashScreenState extends State<SplashScreen> {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('jwt_token');
 
-    await Future.delayed(const Duration(seconds: 2)); // petit effet de pause
+    await Future.delayed(const Duration(seconds: 3)); // petit effet de pause
 
     if (token != null && token.split('.').length == 3) {
       print("🔁 Session existante trouvée, synchronisation en cours...");

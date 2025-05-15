@@ -1,18 +1,45 @@
 class ApiRoutes {
   static const String baseUrl = 'http://localhost:3000/api';
+  static const String ProtectedUrl = '$baseUrl/protected';
 
+  // Auth
   static const String login = '$baseUrl/login';
   static const String register = '$baseUrl/inscription';
-  static const String getCurrentUser = '$baseUrl/protected/getUser';
-  static const String getAllUsers = '$baseUrl/protected/getUsers';
-  static const String updateGenres = '$baseUrl/protected/updateGenres';
-  static const String updateUser = '$baseUrl/protected/updateUser';
-  static const String updatePassword = '$baseUrl/protected/updatePassword';
-  static const String deleteUser = '$baseUrl/protected/deleteUser';
-  static const String addLike = '$baseUrl/protected/addLike';
-  static const String addDislike = '$baseUrl/protected/addDislike';
-  static const String deleteLike = '$baseUrl/protected/deleteLike';
-  static const String deleteDislike = '$baseUrl/protected/deleteDislike';
- static const String addSeenMovie = '$baseUrl/protected/addSeenMovie';
-  static const String deleteSeenMovie = '$baseUrl/protected/deleteSeenMovie';
+
+  // Utilisateur
+  static const String getCurrentUser = '$ProtectedUrl/getUser';
+  static const String getAllUsers = '$ProtectedUrl/getUsers';
+  static const String updateGenres = '$ProtectedUrl/updateGenres';
+  static const String updateUser = '$ProtectedUrl/updateUser';
+  static const String updatePassword = '$ProtectedUrl/updatePassword';
+  static const String deleteUser = '$ProtectedUrl/deleteUser';
+
+  // Likes / Dislikes / Vu
+  static const String addLike = '$ProtectedUrl/addLike';
+  static const String addDislike = '$ProtectedUrl/addDislike';
+  static const String deleteLike = '$ProtectedUrl/deleteLike';
+  static const String deleteDislike = '$ProtectedUrl/deleteDislike';
+  static const String addSeenMovie = '$ProtectedUrl/addSeenMovie';
+  static const String deleteSeenMovie = '$ProtectedUrl/deleteSeenMovie';
+
+  // Amis
+  static const String addFriendRequest = '$ProtectedUrl/addFriendRequest';
+  static const String friendRequestResponse = '$ProtectedUrl/friendRequestResponse';
+  static const String getFriendRequests = '$ProtectedUrl/getFriendRequests';
+  static const String getFriends = '$ProtectedUrl/getfriends';
+  static const String deleteFriend = '$ProtectedUrl/deleteFriend';
+
+  // Recommandations
+  static const String getRecommandation = '$ProtectedUrl/getRecommandation';
+  static const String getRecommandationFriends = '$ProtectedUrl/getRecommandationFriends';
+
+  // Contribution
+  static const String addContribution = '$ProtectedUrl/addContribution';
+  static const String getContributorContributions = '$ProtectedUrl/getContributorContributions';
+
+  // Admin
+  static const String updateUserRights = '$ProtectedUrl/updateUserRights';
+  static const String getContributions = '$ProtectedUrl/contributions';
+  static const String checkContribution = '$ProtectedUrl/checkContribution';
+  static const String deleteUserByEmail = '$ProtectedUrl/deleteUserByEmail';
 }

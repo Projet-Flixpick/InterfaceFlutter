@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/genre_model.dart';
-import 'package:flutter_application_1/services/APINode/recuperer_genres.dart';
+import 'package:flutter_application_1/services/APINode/recuperer_data.dart';
 
 class GenreProvider with ChangeNotifier {
   List<Genre> _genres = [];

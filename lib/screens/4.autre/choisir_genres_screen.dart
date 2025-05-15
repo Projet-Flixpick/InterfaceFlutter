@@ -5,11 +5,14 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 import '../../../providers/genre_provider.dart';
+import '../../../providers/film_statut_provider.dart';
 import '../../../models/genre_model.dart';
 import '../../../widgets/titre_section.dart';
 import '../../../widgets/top_screen_title.dart';
 import '../../../widgets/bottom_nav_bar.dart';
-import '../1.home/home_screen.dart';
+import 'package:flutter_application_1/services/synchroniser_remote2local.dart';
+import 'package:flutter_application_1/providers/auth_provider.dart';
+import 'package:flutter_application_1/screens/1.home/home_screen.dart';
 
 class ChoisirGenresScreen extends StatefulWidget {
   const ChoisirGenresScreen({super.key});
@@ -23,6 +26,23 @@ class _ChoisirGenresScreenState extends State<ChoisirGenresScreen> {
   final Set<String> selectedMongoIds = {};
   int _selectedIndex = 0;
 
+  @override
+  void initState() {
+    super.initState();
+    Future.microtask(() {
+      final filmProvider = Provider.of<FilmStatutProvider>(context, listen: false);
+      final genreProvider = Provider.of<GenreProvider>(context, listen: false);
+
+      selectedMongoIds.addAll(filmProvider.preferredGenres);
+      for (final genre in genreProvider.genres) {
+        if (selectedMongoIds.contains(genre.mongoId)) {
+          selectedGenreIds.add(genre.id);
+        }
+      }
+      setState(() {});
+    });
+  }
+
   void toggleGenre(Genre genre) {
     setState(() {
       if (selectedGenreIds.contains(genre.id)) {
@@ -32,6 +52,13 @@ class _ChoisirGenresScreenState extends State<ChoisirGenresScreen> {
         selectedGenreIds.add(genre.id);
         selectedMongoIds.add(genre.mongoId);
       }
+    });
+  }
+
+  void resetSelection() {
+    setState(() {
+      selectedGenreIds.clear();
+      selectedMongoIds.clear();
     });
   }
 
@@ -52,18 +79,32 @@ class _ChoisirGenresScreenState extends State<ChoisirGenresScreen> {
       );
 
       if (response.statusCode == 200) {
-        Navigator.pushReplacement(
+        await SynchroniserRemote2Local.run(
+          token: token!,
+          authProvider: Provider.of<AuthProvider>(context, listen: false),
+          filmProvider: Provider.of<FilmStatutProvider>(context, listen: false),
+        );
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Genres mis à jour avec succès !"),
+            backgroundColor: Colors.green,
+          ),
+        );
+
+        Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(builder: (context) => const HomeScreen()),
+          (route) => false,
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("API error: ${response.body}")),
+          SnackBar(content: Text("Erreur API : ${response.body}")),
         );
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Connection error.")),
+        const SnackBar(content: Text("Erreur de connexion.")),
       );
     }
   }
@@ -133,9 +174,15 @@ class _ChoisirGenresScreenState extends State<ChoisirGenresScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const TitreSection(
-                    title: 'Select your favorite genres',
-                    sectionColor: Colors.deepOrange,
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: const [
+                      TitreSection(
+                        title: 'Select your favorite genres',
+                        sectionColor: Color(0xFFF9E3A8),
+                      ),
+                      ResetButton(),
+                    ],
                   ),
                   const SizedBox(height: 16),
                   Expanded(
@@ -155,37 +202,46 @@ class _ChoisirGenresScreenState extends State<ChoisirGenresScreen> {
                           child: Container(
                             padding: const EdgeInsets.symmetric(horizontal: 12),
                             decoration: BoxDecoration(
-                              color: isSelected
-                                  ? const Color.fromARGB(255, 240, 82, 108).withAlpha((0.9 * 255).toInt())
-                                  : Colors.grey.shade100,
+                              color: Colors.grey.shade100,
                               borderRadius: BorderRadius.circular(16),
+                              border: isSelected
+                                  ? Border.all(color: Color(0xFFFF5252), width: 2)
+                                  : null,
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.black.withAlpha((0.05 * 255).toInt()),
+                                  color: Colors.black.withOpacity(0.05),
                                   blurRadius: 4,
                                   offset: const Offset(2, 2),
-                                )
+                                ),
                               ],
                             ),
                             child: Row(
-                              mainAxisAlignment: MainAxisAlignment.start,
                               children: [
                                 Icon(
                                   getGenreIcon(genre.name),
-                                  color: isSelected ? Colors.white : Colors.black54,
+                                  color: Colors.black54,
                                 ),
                                 const SizedBox(width: 10),
                                 Expanded(
                                   child: Text(
                                     genre.name,
-                                    style: TextStyle(
-                                      color: isSelected ? Colors.white : Colors.black87,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                      color: Colors.black87,
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
                                 ),
                                 if (isSelected)
-                                  const Icon(Icons.check_circle, color: Colors.white, size: 20),
+                                  Padding(
+                                    padding: const EdgeInsets.only(left: 4),
+                                    child: Image.asset(
+                                      'assets/icons/popcorn_check.png',
+                                      width: 18,
+                                      height: 18,
+                                      fit: BoxFit.contain,
+                                    ),
+                                  ),
                               ],
                             ),
                           ),
@@ -202,12 +258,29 @@ class _ChoisirGenresScreenState extends State<ChoisirGenresScreen> {
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: continueSelection,
-        backgroundColor: Colors.deepOrange,
+        backgroundColor: const Color(0xFFFF5252),
         icon: const Icon(Icons.check, color: Colors.white),
         label: const Text(
-          'Continue',
+          'Save',
           style: TextStyle(color: Colors.white),
         ),
+      ),
+    );
+  }
+}
+
+class ResetButton extends StatelessWidget {
+  const ResetButton({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final parent = context.findAncestorStateOfType<_ChoisirGenresScreenState>();
+    return TextButton.icon(
+      onPressed: parent?.resetSelection,
+      icon: const Icon(Icons.refresh, color: Color(0xFFFF5252)),
+      label: const Text(
+        "Reset",
+        style: TextStyle(color: Color(0xFFFF5252)),
       ),
     );
   }

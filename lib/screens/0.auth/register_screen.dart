@@ -16,7 +16,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController _confirmPasswordController = TextEditingController();
   final TextEditingController _dobController = TextEditingController();
   final AuthApiGo _authApi = AuthApiGo();
+  final _formKey = GlobalKey<FormState>();
 
+  DateTime? _selectedDate;
   bool _isAccepted = false;
   bool _isLoading = false;
   String? _errorMessage;
@@ -32,7 +34,45 @@ class _RegisterScreenState extends State<RegisterScreen> {
     super.dispose();
   }
 
+  String? validateEmail(String value) {
+    final emailRegex = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');
+    if (!emailRegex.hasMatch(value)) {
+      return 'Invalid email address.';
+    }
+    return null;
+  }
+
+  String? validatePassword(String value) {
+    if (value.length < 6) {
+      return 'Password must be at least 6 characters long.';
+    }
+    return null;
+  }
+
+  Future<void> _pickDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime(2005, 1, 1),
+      firstDate: DateTime(1900),
+      lastDate: DateTime.now(),
+      locale: const Locale('fr'),
+    );
+
+    if (picked != null) {
+      setState(() {
+        _selectedDate = picked;
+        _dobController.text = "${picked.day.toString().padLeft(2, '0')}/"
+                              "${picked.month.toString().padLeft(2, '0')}/"
+                              "${picked.year}";
+      });
+    }
+  }
+
   Future<void> _onRegister() async {
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+
     setState(() {
       _isLoading = true;
       _errorMessage = null;
@@ -44,22 +84,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
     final String name = _nameController.text.trim();
     final String firstname = _firstnameController.text.trim();
     final String dob = _dobController.text.trim();
-
-    if (email.isEmpty || password.isEmpty || name.isEmpty || firstname.isEmpty || dob.isEmpty) {
-      setState(() {
-        _isLoading = false;
-        _errorMessage = "Please fill in all fields.";
-      });
-      return;
-    }
-
-    if (password != confirmPassword) {
-      setState(() {
-        _isLoading = false;
-        _errorMessage = "Passwords do not match.";
-      });
-      return;
-    }
 
     if (!_isAccepted) {
       setState(() {
@@ -85,6 +109,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
       );
       Navigator.pop(context, email);
     }
+
+    setState(() {
+      _isLoading = false;
+    });
   }
 
   @override
@@ -94,101 +122,117 @@ class _RegisterScreenState extends State<RegisterScreen> {
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: SingleChildScrollView(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Center(
-                child: Text(
-                  "FlixPick",
-                  style: TextStyle(
-                    fontSize: 40,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.redAccent,
+          child: Form(
+            key: _formKey,
+            child: Column(
+              children: [
+                Center(
+                  child: Text(
+                    "FlixPick",
+                    style: TextStyle(
+                      fontSize: 40,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.redAccent,
+                    ),
+                    textAlign: TextAlign.center,
                   ),
-                  textAlign: TextAlign.center,
                 ),
-              ),
-              const SizedBox(height: 20),
-              Center(
-                child: Image.asset(
+                const SizedBox(height: 20),
+                Image.asset(
                   'assets/images/Logo_FlixPick.png',
                   height: 200,
                   width: 200,
                 ),
-              ),
-              const SizedBox(height: 20),
-
-              // User fields
-              TextField(
-                controller: _firstnameController,
-                decoration: const InputDecoration(labelText: "First Name"),
-              ),
-              TextField(
-                controller: _nameController,
-                decoration: const InputDecoration(labelText: "Last Name"),
-              ),
-              TextField(
-                controller: _emailController,
-                decoration: const InputDecoration(labelText: "Email"),
-              ),
-              TextField(
-                controller: _passwordController,
-                obscureText: true,
-                decoration: const InputDecoration(labelText: "Password"),
-              ),
-              TextField(
-                controller: _confirmPasswordController,
-                obscureText: true,
-                decoration: const InputDecoration(labelText: "Confirm Password"),
-              ),
-              TextField(
-                controller: _dobController,
-                decoration: const InputDecoration(
-                  labelText: "Date of Birth",
-                  hintText: "DD/MM/YYYY",
+                const SizedBox(height: 20),
+                TextFormField(
+                  controller: _firstnameController,
+                  decoration: const InputDecoration(labelText: "First Name"),
                 ),
-                keyboardType: TextInputType.datetime,
-              ),
-
-              const SizedBox(height: 20),
-              Row(
-                children: [
-                  Checkbox(
-                    value: _isAccepted,
-                    onChanged: (bool? value) {
-                      setState(() {
-                        _isAccepted = value ?? false;
-                      });
-                    },
+                const SizedBox(height: 12),
+                TextFormField(
+                  controller: _nameController,
+                  decoration: const InputDecoration(labelText: "Last Name"),
+                ),
+                const SizedBox(height: 12),
+                TextFormField(
+                  controller: _emailController,
+                  decoration: const InputDecoration(labelText: "Email"),
+                  validator: (value) => validateEmail(value ?? ""),
+                ),
+                const SizedBox(height: 12),
+                TextFormField(
+                  controller: _passwordController,
+                  obscureText: true,
+                  decoration: const InputDecoration(labelText: "Password"),
+                  validator: (value) => validatePassword(value ?? ""),
+                ),
+                const SizedBox(height: 12),
+                TextFormField(
+                  controller: _confirmPasswordController,
+                  obscureText: true,
+                  decoration: const InputDecoration(labelText: "Confirm Password"),
+                  validator: (value) {
+                    if (value != _passwordController.text) {
+                      return "Passwords do not match.";
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 12),
+                TextFormField(
+                  controller: _dobController,
+                  readOnly: true,
+                  onTap: () => _pickDate(context),
+                  decoration: const InputDecoration(
+                    labelText: "Date of Birth",
+                    hintText: "JJ/MM/AAAA",
                   ),
-                  Expanded(
-                    child: Wrap(
-                      children: const [
-                        Text(
-                          "I have read and accept the terms and privacy policy.",
-                          style: TextStyle(fontSize: 14),
-                        ),
-                      ],
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please select your date of birth.';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 20),
+                Row(
+                  children: [
+                    Checkbox(
+                      value: _isAccepted,
+                      onChanged: (bool? value) {
+                        setState(() {
+                          _isAccepted = value ?? false;
+                        });
+                      },
                     ),
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 20),
-              if (_errorMessage != null)
-                Text(
-                  _errorMessage!,
-                  style: const TextStyle(color: Colors.red, fontSize: 14),
+                    const SizedBox(height: 12),
+                    const Expanded(
+                      child: Wrap(
+                        children: [
+                          Text(
+                            "I have read and accept the terms and privacy policy.",
+                            style: TextStyle(fontSize: 14),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
-              const SizedBox(height: 10),
-              ElevatedButton(
-                onPressed: _isLoading ? null : _onRegister,
-                child: _isLoading
-                    ? const CircularProgressIndicator(color: Colors.white)
-                    : const Text("Sign Up"),
-              ),
-            ],
+                const SizedBox(height: 20),
+                if (_errorMessage != null)
+                  Text(
+                    _errorMessage!,
+                    style: const TextStyle(color: Colors.red, fontSize: 14),
+                  ),
+                const SizedBox(height: 10),
+                ElevatedButton(
+                  onPressed: _isLoading ? null : _onRegister,
+                  child: _isLoading
+                      ? const CircularProgressIndicator(color: Colors.white)
+                      : const Text("Sign Up"),
+                ),
+              ],
+            ),
           ),
         ),
       ),

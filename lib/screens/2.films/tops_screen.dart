@@ -11,7 +11,8 @@ class TopsScreen extends StatefulWidget {
   _TopsScreenState createState() => _TopsScreenState();
 }
 
-class _TopsScreenState extends State<TopsScreen> {
+class _TopsScreenState extends State<TopsScreen>
+    with AutomaticKeepAliveClientMixin<TopsScreen> {
   List<Film> popularFilms = [];
   List<Film> weeklyFilms = [];
   List<Film> shortFilms = [];
@@ -25,118 +26,122 @@ class _TopsScreenState extends State<TopsScreen> {
   bool isLoading = true;
 
   @override
+  bool get wantKeepAlive => true;
+
+  @override
   void initState() {
     super.initState();
     _loadFilms();
   }
 
   Future<void> _loadFilms() async {
-    final authApi = AuthApiNode();
+    final api = AuthApiNode();
 
-    final popularFilmsData = await authApi.getMovies(page: currentPagePopular);
-    final weeklyFilmsData = await authApi.getMovies(page: currentPageWeekly);
-    final shortFilmsData = await authApi.getMovies(page: currentPageShort);
-    final weeklyShortFilmsData = await authApi.getMovies(page: currentPageWeeklyShort);
+    final popData      = await api.getMovies(page: currentPagePopular);
+    final weekData     = await api.getMovies(page: currentPageWeekly);
+    final shortData    = await api.getMovies(page: currentPageShort);
+    final weekShortData= await api.getMovies(page: currentPageWeeklyShort);
 
+    if (!mounted) return;
     setState(() {
-      popularFilms.addAll(popularFilmsData.take(5).map((filmJson) => Film.fromJson(filmJson)).toList());
-      weeklyFilms.addAll(weeklyFilmsData.take(5).map((filmJson) => Film.fromJson(filmJson)).toList());
-      shortFilms.addAll(shortFilmsData.take(5).map((filmJson) => Film.fromJson(filmJson)).toList());
-      weeklyShortFilms.addAll(weeklyShortFilmsData.take(5).map((filmJson) => Film.fromJson(filmJson)).toList());
+      popularFilms     .addAll(popData.take(5).map((j) => Film.fromJson(j)));
+      weeklyFilms      .addAll(weekData.take(5).map((j) => Film.fromJson(j)));
+      shortFilms       .addAll(shortData.take(5).map((j) => Film.fromJson(j)));
+      weeklyShortFilms .addAll(weekShortData.take(5).map((j) => Film.fromJson(j)));
       isLoading = false;
     });
   }
 
   Future<void> _loadMoreFilms(String section) async {
     if (isLoading) return;
-    setState(() {
-      isLoading = true;
-    });
+    setState(() => isLoading = true);
 
-    List<Film> filmsToAdd = [];
+    final api = AuthApiNode();
+    List<Film> newBatch = [];
 
-    if (section == "popular") {
-      final newFilms = await AuthApiNode().getMovies(page: currentPagePopular);
-      filmsToAdd = newFilms.take(5).map((filmJson) => Film.fromJson(filmJson)).toList();
-      currentPagePopular++;
-    } else if (section == "weekly") {
-      final newFilms = await AuthApiNode().getMovies(page: currentPageWeekly);
-      filmsToAdd = newFilms.take(5).map((filmJson) => Film.fromJson(filmJson)).toList();
-      currentPageWeekly++;
-    } else if (section == "short") {
-      final newFilms = await AuthApiNode().getMovies(page: currentPageShort);
-      filmsToAdd = newFilms.take(5).map((filmJson) => Film.fromJson(filmJson)).toList();
-      currentPageShort++;
-    } else if (section == "weeklyShort") {
-      final newFilms = await AuthApiNode().getMovies(page: currentPageWeeklyShort);
-      filmsToAdd = newFilms.take(5).map((filmJson) => Film.fromJson(filmJson)).toList();
-      currentPageWeeklyShort++;
+    switch (section) {
+      case 'popular':
+        final data = await api.getMovies(page: currentPagePopular++);
+        newBatch = data.take(5).map((j) => Film.fromJson(j)).toList();
+        popularFilms.addAll(newBatch);
+        break;
+      case 'weekly':
+        final data = await api.getMovies(page: currentPageWeekly++);
+        newBatch = data.take(5).map((j) => Film.fromJson(j)).toList();
+        weeklyFilms.addAll(newBatch);
+        break;
+      case 'short':
+        final data = await api.getMovies(page: currentPageShort++);
+        newBatch = data.take(5).map((j) => Film.fromJson(j)).toList();
+        shortFilms.addAll(newBatch);
+        break;
+      case 'weeklyShort':
+        final data = await api.getMovies(page: currentPageWeeklyShort++);
+        newBatch = data.take(5).map((j) => Film.fromJson(j)).toList();
+        weeklyShortFilms.addAll(newBatch);
+        break;
     }
 
-    setState(() {
-      if (section == "popular") {
-        popularFilms.addAll(filmsToAdd);
-      } else if (section == "weekly") {
-        weeklyFilms.addAll(filmsToAdd);
-      } else if (section == "short") {
-        shortFilms.addAll(filmsToAdd);
-      } else if (section == "weeklyShort") {
-        weeklyShortFilms.addAll(filmsToAdd);
-      }
-      isLoading = false;
-    });
+    if (!mounted) return;
+    setState(() => isLoading = false);
   }
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return Scaffold(
       body: isLoading
-          ? const Center(child: CircularProgressIndicator()) // Show loader if isLoading is true
+          ? const Center(child: CircularProgressIndicator())
           : ListView(
+              key: const PageStorageKey('tops_page'),
               children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 15.0),
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 15),
                   child: TitreSection(
                     title: 'Top Popular Movies',
                     sectionColor: Colors.blueAccent,
                   ),
                 ),
                 FilmsList(
+                  key: const PageStorageKey('popular_films'),
                   films: popularFilms,
-                  loadMoreFilms: () => _loadMoreFilms("popular"),
+                  loadMoreFilms: () => _loadMoreFilms('popular'),
                 ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 15.0),
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 15),
                   child: TitreSection(
                     title: 'This Week\'s Movies',
                     sectionColor: Colors.indigo,
                   ),
                 ),
                 FilmsList(
+                  key: const PageStorageKey('weekly_films'),
                   films: weeklyFilms,
-                  loadMoreFilms: () => _loadMoreFilms("weekly"),
+                  loadMoreFilms: () => _loadMoreFilms('weekly'),
                 ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 15.0),
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 15),
                   child: TitreSection(
                     title: 'Top Short Films',
                     sectionColor: Colors.teal,
                   ),
                 ),
                 FilmsList(
+                  key: const PageStorageKey('short_films'),
                   films: shortFilms,
-                  loadMoreFilms: () => _loadMoreFilms("short"),
+                  loadMoreFilms: () => _loadMoreFilms('short'),
                 ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 15.0),
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 15),
                   child: TitreSection(
                     title: 'This Week\'s Short Films',
                     sectionColor: Colors.tealAccent,
                   ),
                 ),
                 FilmsList(
+                  key: const PageStorageKey('weekly_short_films'),
                   films: weeklyShortFilms,
-                  loadMoreFilms: () => _loadMoreFilms("weeklyShort"),
+                  loadMoreFilms: () => _loadMoreFilms('weeklyShort'),
                 ),
               ],
             ),

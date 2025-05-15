@@ -15,6 +15,9 @@ dependencies:
   shared_preferences: ^2.2.2
   provider: ^6.1.1
 
+  flutter_localizations:
+    sdk: flutter
+
 
 dev_dependencies:
   flutter_test:
@@ -27,6 +30,8 @@ flutter:
 
   assets:
     - assets/images/Logo_FlixPick.png
-    - assets/images/icone_film.jpg
+    - assets/icones/icone_film.jpg
     - assets/images/Logo_Popcorn_Solo.png
     - assets/images/Logo_Main_Solo.png
+    - assets/icones/popcorn_check.png
+
