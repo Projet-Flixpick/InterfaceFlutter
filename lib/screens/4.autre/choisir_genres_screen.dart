@@ -87,7 +87,7 @@ class _ChoisirGenresScreenState extends State<ChoisirGenresScreen> {
 
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text("Genres mis à jour avec succès !"),
+            content: Text("Genres updated with success."),
             backgroundColor: Colors.green,
           ),
         );
@@ -190,7 +190,7 @@ class _ChoisirGenresScreenState extends State<ChoisirGenresScreen> {
                       itemCount: genres.length,
                       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: 2,
-                        childAspectRatio: 3.5,
+                        childAspectRatio: 2.8,
                         mainAxisSpacing: 12,
                         crossAxisSpacing: 12,
                       ),
@@ -221,7 +221,7 @@ class _ChoisirGenresScreenState extends State<ChoisirGenresScreen> {
                                   getGenreIcon(genre.name),
                                   color: Colors.black54,
                                 ),
-                                const SizedBox(width: 10),
+                                const SizedBox(width: 15),
                                 Expanded(
                                   child: Text(
                                     genre.name,
@@ -234,11 +234,11 @@ class _ChoisirGenresScreenState extends State<ChoisirGenresScreen> {
                                 ),
                                 if (isSelected)
                                   Padding(
-                                    padding: const EdgeInsets.only(left: 4),
+                                    padding: const EdgeInsets.only(left: 6),
                                     child: Image.asset(
-                                      'assets/icons/popcorn_check.png',
-                                      width: 18,
-                                      height: 18,
+                                      'assets/icones/popcorn_check.png',
+                                      width: 32,
+                                      height: 32,
                                       fit: BoxFit.contain,
                                     ),
                                   ),
