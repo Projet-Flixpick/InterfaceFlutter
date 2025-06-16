@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';  // Pour utiliser le cache HTTP
 
 class AuthApiNode {
-  final String baseUrl = "http://localhost:8080";
+  final String baseUrl = "https://apinode-75sw.onrender.com";
   
   // Instancier un cache manager pour la gestion du cache
   final CacheManager _cacheManager = DefaultCacheManager();

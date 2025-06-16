@@ -65,11 +65,17 @@ class _LoginScreenState extends State<LoginScreen> {
 
     if (response != null && response.containsKey("error")) {
       setState(() {
-        _errorMessage = response["error"];
+        if (response["error"].toString().toLowerCase().contains("connexion") ||
+            response["error"].toString().toLowerCase().contains("401")) {
+          _errorMessage = "Email or password incorrect.";
+        } else {
+          _errorMessage = "Login failed. Please try again.";
+        }
         _isLoading = false;
       });
       return;
     }
+
 
     if (response != null && response.containsKey("token")) {
       final token = response["token"];

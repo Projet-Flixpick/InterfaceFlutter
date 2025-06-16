@@ -17,25 +17,59 @@ class FilmStatutProvider with ChangeNotifier {
   bool isSeen(String id) => _seenFilms.contains(id);
 
   void setDataFromServer({
-    required List<String> likes,
-    required List<String> dislikes,
-    required List<String> seen,
-    required List<String> genres,
+    required List<dynamic> likes,
+    required List<dynamic> dislikes,
+    required List<dynamic> seen,
+    required List<dynamic> genres,
   }) {
-    _likedFilms
-      ..clear()
-      ..addAll(likes);
-    _dislikedFilms
-      ..clear()
-      ..addAll(dislikes);
-    _seenFilms
-      ..clear()
-      ..addAll(seen);
-    _preferredGenres
-      ..clear()
-      ..addAll(genres);
+    print("🟡 DEBUG - setDataFromServer()");
+    print("→ likes: $likes");
+    print("→ dislikes: $dislikes");
+    print("→ seen: $seen");
+    print("→ genres: $genres");
 
-    notifyListeners();
+    try {
+      _likedFilms
+        ..clear()
+        ..addAll(_extractIds(likes));
+      print("✅ likedFilms: $_likedFilms");
+
+      _dislikedFilms
+        ..clear()
+        ..addAll(_extractIds(dislikes));
+      print("✅ dislikedFilms: $_dislikedFilms");
+
+      _seenFilms
+        ..clear()
+        ..addAll(_extractIds(seen));
+      print("✅ seenFilms: $_seenFilms");
+
+      _preferredGenres
+        ..clear()
+        ..addAll(_extractIds(genres));
+      print("✅ preferredGenres: $_preferredGenres");
+
+      notifyListeners();
+    } catch (e, stack) {
+      print("❌ ERREUR dans setDataFromServer: $e");
+      print(stack);
+    }
+  }
+
+  List<String> _extractIds(List<dynamic> data) {
+    print("🔍 DEBUG - _extractIds()");
+    print("→ Entrée: $data");
+
+    return data.map((e) {
+      try {
+        final result = e.toString();
+        print("→ Transformé: $e => $result");
+        return result;
+      } catch (err) {
+        print("❌ Erreur conversion ID: $e → $err");
+        return "Erreur";
+      }
+    }).toList();
   }
 
   Future<void> toggleLike(String filmId, String token) async {

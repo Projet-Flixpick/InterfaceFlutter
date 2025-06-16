@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 import 'providers/genre_provider.dart';
 import 'providers/film_statut_provider.dart';
 import 'providers/auth_provider.dart';
+import 'providers/film_provider.dart';
 
 // Screens
 import 'screens/0.auth/splash_screen.dart';
@@ -28,6 +29,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => GenreProvider()..loadGenres()),
         ChangeNotifierProvider(create: (_) => FilmStatutProvider()),
+        ChangeNotifierProvider(create: (_) => FilmProvider()),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
