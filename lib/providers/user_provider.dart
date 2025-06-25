@@ -1,4 +1,4 @@
-// lib/providers/user_provider.dart
+// ✅ lib/providers/user_provider.dart
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -6,6 +6,8 @@ import 'package:http/http.dart' as http;
 import '../../services/APIgo/api_routes.dart';
 
 class UserProvider with ChangeNotifier {
+  final bool debugMode = false;
+
   String email = '';
   String nom = '';
   String prenom = '';
@@ -25,11 +27,20 @@ class UserProvider with ChangeNotifier {
         headers: {'Authorization': 'Bearer $token'},
       );
 
-      print("==> GET /getUser status: ${res.statusCode}");
-      print("==> Réponse brute: ${res.body}");
+      if (debugMode) {
+        print("==> GET /getUser status: ${res.statusCode}");
+        print("==> Raw response: ${res.body}");
+      }
 
       if (res.statusCode == 200) {
         final data = jsonDecode(res.body);
+
+        if (debugMode) {
+          print("==> Parsed keys:");
+          for (final entry in data.entries) {
+            print("   ${entry.key} = ${entry.value}");
+          }
+        }
 
         email = data['email'] ?? '';
         nom = data['name'] ?? '';
@@ -37,18 +48,29 @@ class UserProvider with ChangeNotifier {
         birthday = data['birthday'] ?? '';
         rights = data['rights'] ?? 0;
 
+        if (debugMode) {
+          print("==> Role brut (from JSON): ${data['rights']}");
+        }
+
         likesCount = (data['likes'] as List?)?.length ?? 0;
         seenCount = (data['movies_seen'] as List?)?.length ?? 0;
         genres = List<String>.from(data['genres'] ?? []);
 
-        print("==> Utilisateur : $prenom $nom ($email)");
-        print("==> Rôle: $rights | Likes: $likesCount | Seen: $seenCount");
+        if (debugMode) {
+          print("==> User: $prenom $nom ($email)");
+          print("==> Role: $rights | Likes: $likesCount | Seen: $seenCount");
+        }
+
         notifyListeners();
       } else {
-        print("❌ Échec de récupération user : ${res.statusCode}");
+        if (debugMode) {
+          print("❌ Failed to fetch user: ${res.statusCode}");
+        }
       }
     } catch (e) {
-      print("❌ Exception loadUser : $e");
+      if (debugMode) {
+        print("❌ Exception in loadUser: $e");
+      }
     }
   }
 
@@ -66,10 +88,14 @@ class UserProvider with ChangeNotifier {
         await prefs.remove('jwt_token');
         return true;
       }
-      print("❌ Suppression échouée : ${res.statusCode}");
+      if (debugMode) {
+        print("❌ Failed to delete user: ${res.statusCode}");
+      }
       return false;
     } catch (e) {
-      print("❌ Exception deleteUser : $e");
+      if (debugMode) {
+        print("❌ Exception in deleteUser: $e");
+      }
       return false;
     }
   }

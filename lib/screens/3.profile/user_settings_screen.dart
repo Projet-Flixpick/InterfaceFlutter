@@ -22,13 +22,13 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
-        title: const Text("Supprimer le compte"),
-        content: const Text("Es-tu sûr de vouloir supprimer ton compte ?"),
+        title: const Text("Delete Account"),
+        content: const Text("Are you sure you want to delete your account?"),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text("Annuler")),
+          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text("Cancel")),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text("Supprimer", style: TextStyle(color: Colors.red)),
+            child: const Text("Delete", style: TextStyle(color: Colors.red)),
           ),
         ],
       ),
@@ -40,7 +40,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> {
         Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => const LoginScreen()));
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Erreur lors de la suppression du compte.")),
+          const SnackBar(content: Text("Account deletion failed.")),
         );
       }
     }
@@ -59,28 +59,28 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> {
     return Consumer<UserProvider>(
       builder: (context, userProvider, _) {
         return Scaffold(
-          appBar: AppBar(title: const Text('Mon profil')),
+          appBar: AppBar(title: const Text('User Settings')),
           body: SingleChildScrollView(
             padding: const EdgeInsets.all(20),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _infoTile("Nom", userProvider.nom),
-                _infoTile("Prénom", userProvider.prenom),
+                _infoTile("Last name", userProvider.nom),
+                _infoTile("First name", userProvider.prenom),
                 _infoTile("Email", userProvider.email),
-                _infoTile("Date de naissance", userProvider.birthday.isEmpty ? "Non renseignée" : userProvider.birthday),
-                _infoTile("Rôle", _mapRights(userProvider.rights)),
+                _infoTile("Birthdate", userProvider.birthday.isEmpty ? "Not specified" : userProvider.birthday),
+                _infoTile("Role", _mapRights(userProvider.rights)),
                 const SizedBox(height: 30),
                 OutlinedButton.icon(
                   icon: const Icon(Icons.delete_forever),
-                  label: const Text("Supprimer mon compte"),
+                  label: const Text("Delete my account"),
                   style: OutlinedButton.styleFrom(foregroundColor: Colors.red),
                   onPressed: _deleteAccount,
                 ),
                 const SizedBox(height: 16),
                 ElevatedButton.icon(
                   icon: const Icon(Icons.logout),
-                  label: const Text("Déconnexion"),
+                  label: const Text("Log out"),
                   onPressed: _logout,
                 ),
               ],
@@ -105,9 +105,9 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> {
 
   String _mapRights(int rights) {
     switch (rights) {
-      case 1: return "Contributeur";
-      case 2: return "Administrateur";
-      default: return "Utilisateur";
+      case 1: return "Contributor";
+      case 2: return "Administrator";
+      default: return "User";
     }
   }
 }

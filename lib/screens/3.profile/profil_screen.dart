@@ -38,16 +38,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Consumer<UserProvider>(
       builder: (context, userProvider, _) {
         return Scaffold(
-          appBar: AppBar(title: const Text('Profile')),
           body: ListView(
             padding: const EdgeInsets.all(16),
             children: [
-              ListTile(
-                leading: const Icon(Icons.person),
-                title: Text("${userProvider.prenom} ${userProvider.nom}"),
-                subtitle: Text(userProvider.email),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _getRoleIcon(userProvider.rights),
+                  const SizedBox(width: 12),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(_mapRights(userProvider.rights),
+                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                      Text("${userProvider.prenom} ${userProvider.nom}"),
+                      Text(userProvider.email, style: const TextStyle(color: Colors.grey)),
+                    ],
+                  ),
+                ],
               ),
-              _statRow("Role", _mapRights(userProvider.rights)),
               const SizedBox(height: 20),
               const Text("Statistics", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               const SizedBox(height: 8),
@@ -117,6 +126,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
       case 1: return "Contributor";
       case 2: return "Administrator";
       default: return "User";
+    }
+  }
+
+  Icon _getRoleIcon(int rights) {
+    switch (rights) {
+      case 1: return const Icon(Icons.handshake);
+      case 2: return const Icon(Icons.shield);
+      default: return const Icon(Icons.person);
     }
   }
 }
