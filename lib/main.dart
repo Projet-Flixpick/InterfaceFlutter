@@ -12,7 +12,17 @@ import 'providers/user_provider.dart';
 
 // Screens
 import 'screens/0.auth/splash_screen.dart';
-import 'theme/theme.dart'; // Ton fichier de thème personnalisé
+import 'screens/1.home/home_screen.dart';
+import 'screens/0.auth/login_screen.dart';
+import 'screens/0.auth/register_screen.dart';
+import 'screens/4.autre/choisir_genres_screen.dart';
+import 'screens/3.profile/profil_screen.dart';
+import 'screens/3.profile/user_genres_screen.dart';
+import 'screens/3.profile/user_films_statut_screen.dart';
+import 'screens/3.profile/user_amis_screen.dart';
+import 'screens/3.profile/user_amis_demandes_screen.dart';
+
+import 'theme/theme.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -36,21 +46,27 @@ class MyApp extends StatelessWidget {
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
         title: 'FlixPick',
-
-        // ✅ Utilisation du thème global défini dans theme.dart
         theme: flixPickTheme,
-
-        // ✅ Localisations
         localizationsDelegates: const [
           GlobalMaterialLocalizations.delegate,
           GlobalWidgetsLocalizations.delegate,
           GlobalCupertinoLocalizations.delegate,
         ],
         supportedLocales: const [
-          Locale('en'), // Tu peux ajouter 'fr' ici si besoin
+          Locale('en'),
         ],
-
         home: const SplashScreen(),
+        routes: {
+          '/home': (context) => const HomeScreen(),
+          '/login': (context) => const LoginScreen(),
+          '/register': (context) => const RegisterScreen(),
+          '/select-genres': (context) => const ChoisirGenresScreen(),
+          '/profile': (context) => const ProfileScreen(),
+          '/my-genres': (context) => const UserGenresScreen(),
+          '/liked-movies': (context) => const UserFilmsStatutScreen(),
+          '/my-friends': (context) => const UserAmisScreen(),
+          '/friend-requests': (context) => const UserAmisDemandesScreen(),
+        },
       ),
     );
   }
