@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../../models/film_model.dart';
 import '../../providers/film_statut_provider.dart';
@@ -14,8 +13,20 @@ class FilmDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final providers = film.providers?['FR'];
+    final allProviders = film.providers;
     final cast = film.cast;
+
+    final mongoId = film.mongoId ?? 'Not available';
+
+    final usFlatrate = (film.providers?['US']?['flatrate'] as List?)?.cast<String>();
+    final frFlatrate = (film.providers?['FR']?['flatrate'] as List?)?.cast<String>();
+
+    final List<String> displayProviders = (usFlatrate?.isNotEmpty == true)
+        ? usFlatrate!.take(3).toList()
+        : (frFlatrate?.isNotEmpty == true)
+            ? frFlatrate!.take(3).toList()
+            : [];
+
 
     return Scaffold(
       appBar: AppBar(
@@ -33,21 +44,67 @@ class FilmDetailScreen extends StatelessWidget {
               fit: BoxFit.cover,
             ),
             const SizedBox(height: 15),
-            Text(
-              film.title,
-              style: const TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 10),
-            Text(
-              'Release Date: ${film.releaseDate}',
-              style: const TextStyle(fontSize: 18),
-            ),
-            const SizedBox(height: 10),
 
-            // Like / Dislike / Seen buttons
+            /// Title + Release Date (correctly aligned)
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Expanded(
+                  child: Text(
+                    film.title,
+                    style: const TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Text(
+                  film.releaseDate,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    color: Colors.black54,
+                  ),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 15),
+
+            /// US Providers
+            if (displayProviders.isNotEmpty) ...[
+              const Text(
+                'Available on :',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: displayProviders.map((name) {
+                  return Container(
+                    margin: const EdgeInsets.only(right: 8),
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 6, horizontal: 10),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(6),
+                      color: Colors.grey.shade200,
+                    ),
+                    child: Text(
+                      name,
+                      style: const TextStyle(fontSize: 14),
+                    ),
+                  );
+                }).toList(),
+              ),
+            ] else ...[
+              const Text(
+                'Available on : Information not available',
+                style: TextStyle(fontSize: 14, color: Colors.grey),
+              ),
+            ],
+
+            const SizedBox(height: 20),
+
+            /// Harmonized Like / Dislike / Seen Buttons
             Consumer2<FilmStatutProvider, AuthProvider>(
               builder: (context, statutProvider, authProvider, _) {
                 final id = film.mongoId;
@@ -60,7 +117,6 @@ class FilmDetailScreen extends StatelessWidget {
                   if (token != null && token.split('.').length == 3) {
                     action(id, token);
                   } else {
-                    print("❌ Token invalide ou manquant");
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
                         content: Text("Erreur : utilisateur non connecté."),
@@ -70,34 +126,44 @@ class FilmDetailScreen extends StatelessWidget {
                 }
 
                 return Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    IconButton(
-                      icon: Icon(Icons.thumb_up,
-                          color: isLiked ? Colors.green : Colors.grey),
-                      onPressed: () =>
-                          handleAction(statutProvider.toggleLike),
-                      tooltip: "Like",
+                    Column(
+                      children: [
+                        IconButton(
+                          icon: Icon(Icons.thumb_up,
+                              color: isLiked ? Colors.green : Colors.grey),
+                          onPressed: () => handleAction(statutProvider.toggleLike),
+                        ),
+                        const Text('Like'),
+                      ],
                     ),
-                    IconButton(
-                      icon: Icon(Icons.thumb_down,
-                          color: isDisliked ? Colors.red : Colors.grey),
-                      onPressed: () =>
-                          handleAction(statutProvider.toggleDislike),
-                      tooltip: "Dislike",
+                    Column(
+                      children: [
+                        IconButton(
+                          icon: Icon(Icons.thumb_down,
+                              color: isDisliked ? Colors.red : Colors.grey),
+                          onPressed: () => handleAction(statutProvider.toggleDislike),
+                        ),
+                        const Text('Dislike'),
+                      ],
                     ),
-                    IconButton(
-                      icon: Icon(Icons.remove_red_eye,
-                          color: isSeen ? Colors.blue : Colors.grey),
-                      onPressed: () => handleAction(statutProvider.toggleVu),
-                      tooltip: "Seen",
+                    Column(
+                      children: [
+                        IconButton(
+                          icon: Icon(Icons.remove_red_eye,
+                              color: isSeen ? Colors.blue : Colors.grey),
+                          onPressed: () => handleAction(statutProvider.toggleVu),
+                        ),
+                        const Text('Seen'),
+                      ],
                     ),
                   ],
                 );
               },
             ),
 
-            const SizedBox(height: 10),
+            const SizedBox(height: 20),
 
             Text(
               film.overview,
@@ -105,7 +171,6 @@ class FilmDetailScreen extends StatelessWidget {
             ),
             const SizedBox(height: 20),
 
-            // Associated genres
             Consumer<GenreProvider>(
               builder: (context, genreProvider, _) {
                 return Wrap(
@@ -180,17 +245,18 @@ class FilmDetailScreen extends StatelessWidget {
             ] else ...[
               const Text('No cast available'),
             ],
+
+            const SizedBox(height: 30),
+
+            /// ID (debug info) at the very bottom
+            Text(
+              'ID: $mongoId',
+              style: const TextStyle(fontSize: 14, color: Colors.grey),
+              textAlign: TextAlign.center,
+            ),
           ],
         ),
       ),
     );
-  }
-
-  void _launchURL(String url) async {
-    if (await canLaunch(url)) {
-      await launch(url);
-    } else {
-      throw 'Could not launch URL: $url';
-    }
   }
 }
