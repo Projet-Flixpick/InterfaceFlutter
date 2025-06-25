@@ -8,6 +8,7 @@ import 'providers/genre_provider.dart';
 import 'providers/film_statut_provider.dart';
 import 'providers/auth_provider.dart';
 import 'providers/film_provider.dart';
+import 'providers/user_provider.dart';
 
 // Screens
 import 'screens/0.auth/splash_screen.dart';
@@ -26,6 +27,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
+        ChangeNotifierProvider(create: (_) => UserProvider()),
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => GenreProvider()..loadGenres()),
         ChangeNotifierProvider(create: (_) => FilmStatutProvider()),

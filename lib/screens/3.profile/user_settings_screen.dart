@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:flutter_application_1/screens/0.auth/login_screen.dart';
+import '../../providers/user_provider.dart';
+import '../0.auth/login_screen.dart';
 
 class UserSettingsScreen extends StatefulWidget {
   const UserSettingsScreen({super.key});
@@ -10,86 +12,102 @@ class UserSettingsScreen extends StatefulWidget {
 }
 
 class _UserSettingsScreenState extends State<UserSettingsScreen> {
-  final _formKey = GlobalKey<FormState>();
-  final TextEditingController _pseudoController = TextEditingController();
-  final TextEditingController _emailController = TextEditingController();
-
   @override
-  void dispose() {
-    _pseudoController.dispose();
-    _emailController.dispose();
-    super.dispose();
+  void initState() {
+    super.initState();
+    Provider.of<UserProvider>(context, listen: false).loadUser();
+  }
+
+  void _deleteAccount() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text("Supprimer le compte"),
+        content: const Text("Es-tu sûr de vouloir supprimer ton compte ?"),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text("Annuler")),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text("Supprimer", style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      final success = await Provider.of<UserProvider>(context, listen: false).deleteUser();
+      if (success && context.mounted) {
+        Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => const LoginScreen()));
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Erreur lors de la suppression du compte.")),
+        );
+      }
+    }
   }
 
   void _logout() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('jwt_token');
     if (context.mounted) {
-      Navigator.of(context).pushReplacement(MaterialPageRoute(
-        builder: (_) => const LoginScreen(),
-      ));
-    }
-  }
-
-  void _deleteAccount() {
-    // TODO: Call API to delete account
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("Account deletion not yet implemented.")),
-    );
-  }
-
-  void _saveChanges() {
-    if (_formKey.currentState!.validate()) {
-      // TODO: Call API to save changes
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Changes saved.")),
-      );
+      Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => const LoginScreen()));
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('User Settings')),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Form(
-          key: _formKey,
-          child: ListView(
-            children: [
-              TextFormField(
-                controller: _pseudoController,
-                decoration: const InputDecoration(labelText: 'Username'),
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _emailController,
-                decoration: const InputDecoration(labelText: 'Email Address'),
-                keyboardType: TextInputType.emailAddress,
-              ),
-              const SizedBox(height: 24),
-              ElevatedButton.icon(
-                icon: const Icon(Icons.save),
-                label: const Text("Save"),
-                onPressed: _saveChanges,
-              ),
-              const SizedBox(height: 24),
-              OutlinedButton.icon(
-                icon: const Icon(Icons.delete_forever),
-                label: const Text("Delete Account"),
-                style: OutlinedButton.styleFrom(foregroundColor: Colors.red),
-                onPressed: _deleteAccount,
-              ),
-              const Divider(height: 40),
-              ListTile(
-                leading: const Icon(Icons.logout),
-                title: const Text("Log Out"),
-                onTap: _logout,
-              ),
-            ],
+    return Consumer<UserProvider>(
+      builder: (context, userProvider, _) {
+        return Scaffold(
+          appBar: AppBar(title: const Text('Mon profil')),
+          body: SingleChildScrollView(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _infoTile("Nom", userProvider.nom),
+                _infoTile("Prénom", userProvider.prenom),
+                _infoTile("Email", userProvider.email),
+                _infoTile("Date de naissance", userProvider.birthday.isEmpty ? "Non renseignée" : userProvider.birthday),
+                _infoTile("Rôle", _mapRights(userProvider.rights)),
+                const SizedBox(height: 30),
+                OutlinedButton.icon(
+                  icon: const Icon(Icons.delete_forever),
+                  label: const Text("Supprimer mon compte"),
+                  style: OutlinedButton.styleFrom(foregroundColor: Colors.red),
+                  onPressed: _deleteAccount,
+                ),
+                const SizedBox(height: 16),
+                ElevatedButton.icon(
+                  icon: const Icon(Icons.logout),
+                  label: const Text("Déconnexion"),
+                  onPressed: _logout,
+                ),
+              ],
+            ),
           ),
-        ),
+        );
+      },
+    );
+  }
+
+  Widget _infoTile(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Row(
+        children: [
+          Expanded(child: Text(label, style: const TextStyle(fontWeight: FontWeight.bold))),
+          Text(value, style: const TextStyle(color: Colors.black87)),
+        ],
       ),
     );
+  }
+
+  String _mapRights(int rights) {
+    switch (rights) {
+      case 1: return "Contributeur";
+      case 2: return "Administrateur";
+      default: return "Utilisateur";
+    }
   }
 }

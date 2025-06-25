@@ -22,32 +22,32 @@ class FilmStatutProvider with ChangeNotifier {
     required List<dynamic> seen,
     required List<dynamic> genres,
   }) {
-    print("🟡 DEBUG - setDataFromServer()");
-    print("→ likes: $likes");
-    print("→ dislikes: $dislikes");
-    print("→ seen: $seen");
-    print("→ genres: $genres");
+    //print("🟡 DEBUG - setDataFromServer()");
+    //print("→ likes: $likes");
+    //print("→ dislikes: $dislikes");
+    //print("→ seen: $seen");
+    //print("→ genres: $genres");
 
     try {
       _likedFilms
         ..clear()
         ..addAll(_extractIds(likes));
-      print("✅ likedFilms: $_likedFilms");
+      //print("✅ likedFilms: $_likedFilms");
 
       _dislikedFilms
         ..clear()
         ..addAll(_extractIds(dislikes));
-      print("✅ dislikedFilms: $_dislikedFilms");
+      //print("✅ dislikedFilms: $_dislikedFilms");
 
       _seenFilms
         ..clear()
         ..addAll(_extractIds(seen));
-      print("✅ seenFilms: $_seenFilms");
+      //print("✅ seenFilms: $_seenFilms");
 
       _preferredGenres
         ..clear()
         ..addAll(_extractIds(genres));
-      print("✅ preferredGenres: $_preferredGenres");
+      //print("✅ preferredGenres: $_preferredGenres");
 
       notifyListeners();
     } catch (e, stack) {
@@ -57,13 +57,13 @@ class FilmStatutProvider with ChangeNotifier {
   }
 
   List<String> _extractIds(List<dynamic> data) {
-    print("🔍 DEBUG - _extractIds()");
-    print("→ Entrée: $data");
+    //print("🔍 DEBUG - _extractIds()");
+    //print("→ Entrée: $data");
 
     return data.map((e) {
       try {
         final result = e.toString();
-        print("→ Transformé: $e => $result");
+        //print("→ Transformé: $e => $result");
         return result;
       } catch (err) {
         print("❌ Erreur conversion ID: $e → $err");
