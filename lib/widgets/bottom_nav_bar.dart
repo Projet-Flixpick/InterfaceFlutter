@@ -13,11 +13,12 @@ class BottomNavBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BottomNavigationBar(
-      currentIndex: selectedIndex,           // Shows the selected index
-      onTap: onItemTapped,                   // Calls the function to switch tabs
+      currentIndex: selectedIndex,
+      onTap: onItemTapped,
       selectedItemColor: Colors.blue,
       unselectedItemColor: Colors.grey,
       showUnselectedLabels: true,
+      type: BottomNavigationBarType.fixed,
       items: const [
         BottomNavigationBarItem(
           icon: Icon(Icons.home),
@@ -25,7 +26,11 @@ class BottomNavBar extends StatelessWidget {
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.trending_up),
-          label: "Top Picks",
+          label: "Top Films",
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.live_tv),
+          label: "Top Series",
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.recommend),

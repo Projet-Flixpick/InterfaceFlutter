@@ -131,7 +131,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Icon _getRoleIcon(int rights) {
     switch (rights) {
-      case 1: return const Icon(Icons.handshake);
+      case 1: return const Icon(Icons.movie);
       case 2: return const Icon(Icons.shield);
       default: return const Icon(Icons.person);
     }

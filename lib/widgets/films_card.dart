@@ -11,7 +11,6 @@ class FilmsCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        // When a film is tapped, navigate to its detail page
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -20,23 +19,26 @@ class FilmsCard extends StatelessWidget {
         );
       },
       child: Container(
-        margin: const EdgeInsets.symmetric(
-            horizontal: 8.0), // Add spacing between films
+        margin: const EdgeInsets.symmetric(horizontal: 8.0),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(10),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            // Display the film poster
             Image.network(
               film.posterPath,
               width: 100,
               height: 150,
               fit: BoxFit.cover,
+              errorBuilder: (_, __, ___) => Image.asset(
+                'assets/images/no_image.png',
+                width: 100,
+                height: 150,
+                fit: BoxFit.cover,
+              ),
             ),
             const SizedBox(height: 5),
-            // Film title and release year
             SizedBox(
               width: 100,
               child: Column(

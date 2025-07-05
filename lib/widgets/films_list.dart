@@ -1,27 +1,31 @@
 import 'package:flutter/material.dart';
 import 'films_card.dart';
 import '../models/film_model.dart';
+import 'popcorn_loader.dart';
 
 class FilmsList extends StatefulWidget {
-  final List<Film> films; // List of already loaded films
-  final Function loadMoreFilms; // Function to load more films
+  final List<Film> films;
+  final Future<void> Function() loadMoreFilms;
 
-  const FilmsList({Key? key, required this.films, required this.loadMoreFilms}) 
-      : super(key: key);
+  const FilmsList({
+    Key? key,
+    required this.films,
+    required this.loadMoreFilms,
+  }) : super(key: key);
 
   @override
   _FilmsListState createState() => _FilmsListState();
 }
 
 class _FilmsListState extends State<FilmsList> {
-  late ScrollController _scrollController;
-  bool isLoading = false; // Local state for loading
+  late final ScrollController _scrollController;
+  bool isLoading = false;
 
   @override
   void initState() {
     super.initState();
-    _scrollController = ScrollController();
-    _scrollController.addListener(_scrollListener); // Scroll listener
+    _scrollController = ScrollController()
+      ..addListener(_scrollListener);
   }
 
   @override
@@ -31,15 +35,14 @@ class _FilmsListState extends State<FilmsList> {
   }
 
   void _scrollListener() {
-    // When reaching the end of the list, load more films
-    if (_scrollController.position.pixels == _scrollController.position.maxScrollExtent && !isLoading) {
-      setState(() {
-        isLoading = true; // Set loading to true while fetching more films
-      });
+    if (_scrollController.position.pixels >=
+            _scrollController.position.maxScrollExtent - 100 &&
+        !isLoading) {
+      setState(() => isLoading = true);
       widget.loadMoreFilms().then((_) {
-        setState(() {
-          isLoading = false; // Reset loading after fetch
-        });
+        if (mounted) {
+          setState(() => isLoading = false);
+        }
       });
     }
   }
@@ -47,20 +50,29 @@ class _FilmsListState extends State<FilmsList> {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 220.0, // Fixed height for horizontal list
+      height: 220.0,
       child: ListView.builder(
         controller: _scrollController,
         scrollDirection: Axis.horizontal,
-        itemCount: widget.films.length + (isLoading ? 1 : 0), // Add 1 for loader if needed
+        itemCount: widget.films.length + (isLoading ? 1 : 0),
         itemBuilder: (context, index) {
           if (index == widget.films.length) {
-            return const Center(child: CircularProgressIndicator()); // Show loader
-          } else {
-            return Padding(
-              padding: const EdgeInsets.only(right: 2), // Space between film cards
-              child: FilmsCard(film: widget.films[index]),
+            return const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 10),
+              child: Center(
+                child: PopcornLoader(
+                  size: 30,
+                  color: Color(0xFFFAD271),
+                  strokeWidth: 3,
+                ),
+              ),
             );
           }
+
+          return Padding(
+            padding: const EdgeInsets.only(right: 2),
+            child: FilmsCard(film: widget.films[index]),
+          );
         },
       ),
     );
