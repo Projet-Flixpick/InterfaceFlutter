@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import '../../models/film_model.dart';
 import '../../models/genre_model.dart';
 
-const String baseUrl = 'https://apinode-75sw.onrender.com';
+const String baseUrl = 'https://apinode-foo2.onrender.com';
 
 /// ----------------------------
 /// GENRES

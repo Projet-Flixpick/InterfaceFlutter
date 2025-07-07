@@ -6,7 +6,7 @@ import 'package:flutter_application_1/models/genre_model.dart';
 import 'package:flutter_application_1/models/film_model.dart';
 
 /// Constante d'URL de base
-const String baseUrl = 'https://apinode-75sw.onrender.com';
+const String baseUrl = 'https://apinode-foo2.onrender.com';
 
 /// ----------------------------
 /// 🔹 GENRES
