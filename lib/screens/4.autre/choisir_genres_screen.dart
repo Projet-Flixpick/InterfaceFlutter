@@ -179,7 +179,6 @@ class _ChoisirGenresScreenState extends State<ChoisirGenresScreen> {
                     children: const [
                       TitreSection(
                         title: 'Select your favorite genres',
-                        sectionColor: Color(0xFFF9E3A8),
                       ),
                       ResetButton(),
                     ],
@@ -205,7 +204,7 @@ class _ChoisirGenresScreenState extends State<ChoisirGenresScreen> {
                               color: Colors.grey.shade100,
                               borderRadius: BorderRadius.circular(16),
                               border: isSelected
-                                  ? Border.all(color: Color(0xFFFF5252), width: 2)
+                                  ? Border.all(color: Color(0xFFC14040), width: 2)
                                   : null,
                               boxShadow: [
                                 BoxShadow(

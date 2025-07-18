@@ -123,31 +123,25 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
-        appBar: AppBar(title: const Text("Log in!")),
+        backgroundColor: Colors.white,
         body: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.symmetric(horizontal: 24.0),
           child: SingleChildScrollView(
             child: Form(
               key: _formKey,
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text(
-                    "FlixPick",
-                    style: TextStyle(
-                      fontSize: 40,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.redAccent,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 90),
                   Image.asset(
-                    'assets/images/Logo_FlixPick.png',
-                    height: 200,
-                    width: 200,
+                    'assets/images/Logo_FlixPick_Enter.png',
+                    height: 150,
                   ),
-                  const SizedBox(height: 20),
+                  Image.asset(
+                    'assets/images/Logo_PopCorn_Solo.png',
+                    height: 200,
+                  ),
+                  const SizedBox(height: 40),
                   TextFormField(
                     controller: _emailController,
                     decoration: const InputDecoration(labelText: "Email"),
@@ -170,15 +164,20 @@ class _LoginScreenState extends State<LoginScreen> {
                   const SizedBox(height: 10),
                   ElevatedButton(
                     onPressed: _isLoading ? null : _onLogin,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.redAccent,
+                      padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 12),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    ),
                     child: _isLoading
                         ? const CircularProgressIndicator(color: Colors.white)
-                        : const Text("Log in"),
+                        : const Text("Se connecter", style: TextStyle(fontSize: 16)),
                   ),
                   const SizedBox(height: 20),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Text("Don't have an account yet? "),
+                      const Text("Pas encore de compte ?"),
                       TextButton(
                         onPressed: () async {
                           final result = await Navigator.push(
@@ -192,7 +191,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             });
                           }
                         },
-                        child: const Text("Sign up"),
+                        child: const Text("Inscription"),
                       ),
                     ],
                   ),

@@ -25,8 +25,8 @@ class BottomNavBar extends StatelessWidget {
           label: "Home",
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.trending_up),
-          label: "Top Films",
+          icon: Icon(Icons.movie),
+          label: "Top Movies",
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.live_tv),

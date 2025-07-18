@@ -12,6 +12,8 @@ class _AnimatedLogoState extends State<AnimatedLogo>
   late AnimationController _controller;
   late Animation<double> _positionAnimation;
 
+  int dotCount = 0;
+
   @override
   void initState() {
     super.initState();
@@ -24,6 +26,20 @@ class _AnimatedLogoState extends State<AnimatedLogo>
     _positionAnimation = Tween<double>(begin: 0, end: 69).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
     );
+
+    // Lance l’animation des "..."
+    _startDotAnimation();
+  }
+
+  void _startDotAnimation() {
+    Future.doWhile(() async {
+      await Future.delayed(const Duration(milliseconds: 500));
+      if (!mounted) return false;
+      setState(() {
+        dotCount = (dotCount + 1) % 4;
+      });
+      return true;
+    });
   }
 
   @override
@@ -34,6 +50,8 @@ class _AnimatedLogoState extends State<AnimatedLogo>
 
   @override
   Widget build(BuildContext context) {
+    final dots = '.' * dotCount;
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -43,7 +61,6 @@ class _AnimatedLogoState extends State<AnimatedLogo>
           child: Stack(
             alignment: Alignment.center,
             children: [
-              // 🍿 Popcorn bucket
               Positioned(
                 bottom: 0,
                 child: Image.asset(
@@ -52,8 +69,6 @@ class _AnimatedLogoState extends State<AnimatedLogo>
                   fit: BoxFit.contain,
                 ),
               ),
-
-              // ✋ Animated hand
               AnimatedBuilder(
                 animation: _positionAnimation,
                 builder: (context, child) {
@@ -72,12 +87,12 @@ class _AnimatedLogoState extends State<AnimatedLogo>
           ),
         ),
         const SizedBox(height: 20),
-        const Text(
-          "Chargement...",
-          style: TextStyle(
+        Text(
+          "Chargement$dots",
+          style: const TextStyle(
             fontSize: 18,
-            fontWeight: FontWeight.w500,
-            color: Colors.grey,
+            fontWeight: FontWeight.w600,
+            color: Color(0xFFC14040),
           ),
         ),
       ],

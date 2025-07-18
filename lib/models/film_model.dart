@@ -72,7 +72,7 @@ class Film {
               ?.map((actorJson) => Cast.fromJson(actorJson))
               .toList() ??
           [],
-      isSerie: json['serie'] ?? false,
+      isSerie: json['type'] == 'serie'
     );
   }
 }

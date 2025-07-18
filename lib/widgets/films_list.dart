@@ -49,31 +49,34 @@ class _FilmsListState extends State<FilmsList> {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 220.0,
-      child: ListView.builder(
-        controller: _scrollController,
-        scrollDirection: Axis.horizontal,
-        itemCount: widget.films.length + (isLoading ? 1 : 0),
-        itemBuilder: (context, index) {
-          if (index == widget.films.length) {
-            return const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 10),
-              child: Center(
-                child: PopcornLoader(
-                  size: 30,
-                  color: Color(0xFFFAD271),
-                  strokeWidth: 3,
+    return Padding(
+      padding: const EdgeInsets.only(left: 12, right: 0),
+      child: SizedBox(
+        height: 220.0,
+        child: ListView.builder(
+          controller: _scrollController,
+          scrollDirection: Axis.horizontal,
+          itemCount: widget.films.length + (isLoading ? 1 : 0),
+          itemBuilder: (context, index) {
+            if (index == widget.films.length) {
+              return const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 10),
+                child: Center(
+                  child: PopcornLoader(
+                    size: 30,
+                    color: Color(0xFFFAD271),
+                    strokeWidth: 3,
+                  ),
                 ),
-              ),
-            );
-          }
+              );
+            }
 
-          return Padding(
-            padding: const EdgeInsets.only(right: 2),
-            child: FilmsCard(film: widget.films[index]),
-          );
-        },
+            return Padding(
+              padding: const EdgeInsets.only(right: 3.0),
+              child: FilmsCard(film: widget.films[index]),
+            );
+          },
+        ),
       ),
     );
   }

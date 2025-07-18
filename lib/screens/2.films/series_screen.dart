@@ -112,66 +112,27 @@ class _SeriesScreenState extends State<SeriesScreen>
       body: ListView(
         key: const PageStorageKey('series_page'),
         children: [
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 15),
-            child: TitreSection(
-              title: 'Most Popular Series',
-              sectionColor: Colors.purpleAccent,
-            ),
-          ),
+          TitreSection(title: 'Most Popular Series'),
           isLoadingPopular
-              ? const Center(
-                  child: PopcornLoader(
-                    size: 28,
-                    strokeWidth: 2.5,
-                    color: Color(0xFFFAD271),
-                    padding: EdgeInsets.symmetric(vertical: 20),
-                  ),
-                )
+              ? const Center(child: PopcornLoader())
               : FilmsList(
                   key: const PageStorageKey('popular_series'),
                   films: popularSeries,
                   loadMoreFilms: () => _loadMore('popular'),
                 ),
 
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 15),
-            child: TitreSection(
-              title: 'Top Rated Series',
-              sectionColor: Colors.green,
-            ),
-          ),
+          TitreSection(title: 'Top Rated Series'),
           isLoadingTop
-              ? const Center(
-                  child: PopcornLoader(
-                    size: 28,
-                    strokeWidth: 2.5,
-                    color: Color(0xFFFAD271),
-                    padding: EdgeInsets.symmetric(vertical: 20),
-                  ),
-                )
+              ? const Center(child: PopcornLoader())
               : FilmsList(
                   key: const PageStorageKey('top_series'),
                   films: topRatedSeries,
                   loadMoreFilms: () => _loadMore('top'),
                 ),
 
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 15),
-            child: TitreSection(
-              title: 'Unvoted Series',
-              sectionColor: Colors.grey,
-            ),
-          ),
+          TitreSection(title: 'Unvoted Series'),
           isLoadingUnvoted
-              ? const Center(
-                  child: PopcornLoader(
-                    size: 28,
-                    strokeWidth: 2.5,
-                    color: Color(0xFFFAD271),
-                    padding: EdgeInsets.symmetric(vertical: 20),
-                  ),
-                )
+              ? const Center(child: PopcornLoader())
               : FilmsList(
                   key: const PageStorageKey('unvoted_series'),
                   films: unvotedSeries,

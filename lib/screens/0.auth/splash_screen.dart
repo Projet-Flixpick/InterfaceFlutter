@@ -7,7 +7,7 @@ import '../1.home/home_screen.dart';
 import '../../services/synchroniser_remote2local.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/film_statut_provider.dart';
-import '../../widgets/animated_logo.dart'; // à adapter selon ton arborescence
+import '../../widgets/loader.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({Key? key}) : super(key: key);
@@ -56,7 +56,7 @@ class _SplashScreenState extends State<SplashScreen> {
   Widget build(BuildContext context) {
     return const Scaffold(
       body: Center(
-        child: AnimatedLogo(), // ici le logo animé personnalisé
+        child: AnimatedLogo(),
       ),
     );
   }

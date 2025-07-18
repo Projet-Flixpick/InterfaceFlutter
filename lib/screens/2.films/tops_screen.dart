@@ -46,10 +46,8 @@ class _TopsScreenState extends State<TopsScreen>
       case 'popular':
         if (isPopularLoading) return;
         setState(() => isPopularLoading = true);
-
         final data = await fetchPopularMovies(page: popularPage++);
         final valid = data.where((f) => f.voteAverage != 10).toList();
-
         if (!mounted) return;
         setState(() {
           popularFilms.addAll(valid);
@@ -60,15 +58,11 @@ class _TopsScreenState extends State<TopsScreen>
       case 'top':
         if (isTopLoading) return;
         setState(() => isTopLoading = true);
-
         List<Film> validTop = [];
-
-        // Skip pages full of voteAverage == 10
         while (validTop.isEmpty && topPage < 10) {
           final data = await fetchTopMovies(page: topPage++);
           validTop = data.where((f) => f.voteAverage != 10).toList();
         }
-
         if (!mounted) return;
         setState(() {
           topRatedFilms.addAll(validTop);
@@ -79,9 +73,7 @@ class _TopsScreenState extends State<TopsScreen>
       case 'unvoted':
         if (isUnvotedLoading) return;
         setState(() => isUnvotedLoading = true);
-
         final data = await fetchUnvotedMovies(page: unvotedPage++);
-
         if (!mounted) return;
         setState(() {
           unvotedFilms.addAll(data);
@@ -97,13 +89,7 @@ class _TopsScreenState extends State<TopsScreen>
     return ListView(
       key: const PageStorageKey('tops_page'),
       children: [
-        const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 15),
-          child: TitreSection(
-            title: 'Most Popular Films',
-            sectionColor: Colors.blueAccent,
-          ),
-        ),
+        TitreSection(title: 'Most Popular Films'),
         popularFilms.isEmpty
             ? const Center(child: PopcornLoader())
             : FilmsList(
@@ -111,14 +97,7 @@ class _TopsScreenState extends State<TopsScreen>
                 films: popularFilms,
                 loadMoreFilms: () => _loadMoreFilms('popular'),
               ),
-
-        const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 15),
-          child: TitreSection(
-            title: 'Top Rated Films',
-            sectionColor: Colors.green,
-          ),
-        ),
+        TitreSection(title: 'Top Rated Films'),
         topRatedFilms.isEmpty
             ? const Center(child: PopcornLoader())
             : FilmsList(
@@ -126,14 +105,7 @@ class _TopsScreenState extends State<TopsScreen>
                 films: topRatedFilms,
                 loadMoreFilms: () => _loadMoreFilms('top'),
               ),
-
-        const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 15),
-          child: TitreSection(
-            title: 'Unvoted Films',
-            sectionColor: Colors.grey,
-          ),
-        ),
+        TitreSection(title: 'Unvoted Films'),
         unvotedFilms.isEmpty
             ? const Center(child: PopcornLoader())
             : FilmsList(

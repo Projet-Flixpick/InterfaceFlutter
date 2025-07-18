@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../../models/film_model.dart';
 import '../../models/genre_model.dart';
+import '../../models/person_model.dart';
+
 
 const String baseUrl = 'https://apinode-foo2.onrender.com';
 
@@ -121,5 +123,74 @@ Future<List<Film>> fetchUnvotedSeries({int page = 1}) async {
     return (data as List).map((e) => Film.fromJson(e)).toList();
   } else {
     throw Exception('Erreur chargement séries non notées');
+  }
+}
+
+
+
+/// ----------------------------
+/// RECHERCHE / AUTRE
+/// ----------------------------
+
+Future<List<Film>> fetchSearchMedia(String query) async {
+  final response = await http.get(
+    Uri.parse('$baseUrl/search/media?title=${Uri.encodeQueryComponent(query.trim())}'),
+  );
+  if (response.statusCode == 200) {
+    final json = jsonDecode(response.body);
+    final data = json['data'] ?? json;
+    return (data as List).map((e) => Film.fromJson(e)).toList();
+  } else {
+    throw Exception('Erreur chargement recherche');
+  }
+}
+
+
+Future<List<Person>> fetchSearchPeople(String query) async {
+  final response = await http.get(
+    Uri.parse('$baseUrl/search/people?name=${Uri.encodeQueryComponent(query.trim())}'),
+  );
+  if (response.statusCode == 200) {
+    final json = jsonDecode(response.body);
+    final data = json['data'] ?? json;
+    return (data as List).map((e) => Person.fromJson(e)).toList();
+  } else {
+    throw Exception('Erreur chargement recherche personnes');
+  }
+}
+
+/// ----------------------------
+/// ACTEURS
+/// ----------------------------
+
+Future<List<Person>> fetchAllPeople() async {
+  final response = await http.get(Uri.parse('$baseUrl/people'));
+  if (response.statusCode == 200) {
+    final json = jsonDecode(response.body);
+    final data = json['data'] ?? json;
+    return (data as List).map((e) => Person.fromJson(e)).toList();
+  } else {
+    throw Exception('Erreur chargement des acteurs');
+  }
+}
+
+Future<Person> fetchPersonById(String id) async {
+  final response = await http.get(Uri.parse('$baseUrl/people/$id'));
+  if (response.statusCode == 200) {
+    final json = jsonDecode(response.body);
+    return Person.fromJson(json['data'] ?? json);
+  } else {
+    throw Exception("Erreur chargement acteur $id");
+  }
+}
+
+Future<List<Film>> fetchMoviesByPersonId(String id) async {
+  final response = await http.get(Uri.parse('$baseUrl/people/$id/movies'));
+  if (response.statusCode == 200) {
+    final json = jsonDecode(response.body);
+    final data = json['data'] ?? json;
+    return (data as List).map((e) => Film.fromJson(e)).toList();
+  } else {
+    throw Exception("Erreur chargement films de l'acteur $id");
   }
 }

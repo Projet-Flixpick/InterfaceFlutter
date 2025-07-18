@@ -5,13 +5,15 @@ import '../../widgets/films_list.dart';
 import '../../widgets/bottom_nav_bar.dart';
 import '../../widgets/top_screen_title.dart';
 import '../../widgets/popcorn_loader.dart';
-
+import '../../widgets/search_icon.dart';
+import '../../widgets/titre_section.dart';
 
 // Models
 import '../../models/film_model.dart';
+import '../../models/person_model.dart';
 
 // Services
-import '../../services/APINode/auth_api_node.dart';
+import '../../services/APINode/api_routes_node.dart';
 
 // Screens
 import '../3.profile/profil_screen.dart';
@@ -29,7 +31,6 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
 
-  // List of screens
   final List<Widget> _screens = [
     const HomeContent(),
     TopsScreen(),
@@ -38,7 +39,6 @@ class _HomeScreenState extends State<HomeScreen> {
     ProfileScreen(),
   ];
 
-  // List of screen titles
   final List<String> _titles = [
     "Home",
     "Top Movies",
@@ -57,7 +57,10 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: TopScreenTitle(title: _titles[_selectedIndex]),
-      body: _screens[_selectedIndex],
+      body: IndexedStack(
+        index: _selectedIndex,
+        children: _screens,
+      ),
       bottomNavigationBar: BottomNavBar(
         selectedIndex: _selectedIndex,
         onItemTapped: _onItemTapped,
@@ -82,6 +85,10 @@ class _HomeContentState extends State<HomeContent> {
   int currentPage = 1;
   bool isLoading = false;
 
+  final TextEditingController _searchController = TextEditingController();
+  List<dynamic> searchResults = [];
+  bool searching = false;
+
   @override
   void initState() {
     super.initState();
@@ -89,12 +96,10 @@ class _HomeContentState extends State<HomeContent> {
   }
 
   Future<void> _loadFilms() async {
-    final authApi = AuthApiNode();
-    final filmsData = await authApi.getMovies(page: currentPage);
-
+    final filmsData = await fetchPopularMovies(page: currentPage);
     if (!mounted) return;
     setState(() {
-      films.addAll(filmsData.take(20).map((filmJson) => Film.fromJson(filmJson)).toList());
+      films.addAll(filmsData.take(20).toList());
       currentPage++;
     });
   }
@@ -103,37 +108,119 @@ class _HomeContentState extends State<HomeContent> {
     if (isLoading) return;
     setState(() => isLoading = true);
 
-    final authApi = AuthApiNode();
-    final filmsData = await authApi.getMovies(page: currentPage);
-
+    final filmsData = await fetchPopularMovies(page: currentPage);
     if (!mounted) return;
     setState(() {
-      films.addAll(filmsData.take(20).map((filmJson) => Film.fromJson(filmJson)).toList());
+      films.addAll(filmsData.take(20).toList());
       currentPage++;
       isLoading = false;
     });
   }
 
+  Future<void> _onSearchChanged(String query) async {
+    if (query.isEmpty) {
+      setState(() {
+        searchResults = [];
+        searching = false;
+      });
+      return;
+    }
+
+    setState(() {
+      searching = true;
+    });
+
+    try {
+      final resultsMedia = await fetchSearchMedia(query);
+      final resultsPeople = await fetchSearchPeople(query);
+
+      if (!mounted) return;
+      setState(() {
+        searchResults = [
+          ...resultsMedia.map((film) => {'type': 'media', 'data': film}),
+          ...resultsPeople.map((person) => {'type': 'person', 'data': person}),
+        ];
+        searching = false;
+      });
+    } catch (e) {
+      setState(() {
+        searching = false;
+        searchResults = [];
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            const Text(
-              'Popular Movies',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
+      child: Column(
+        children: [
+          // ---- Barre de recherche ----
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 14.0),
+            child: TextField(
+              controller: _searchController,
+              decoration: InputDecoration(
+                hintText: 'Rechercher un film, une série, un acteur...',
+                prefixIcon: Icon(Icons.search),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
               ),
+              onChanged: _onSearchChanged,
             ),
+          ),
+          if (searching)
+            const CircularProgressIndicator(),
+
+          if (_searchController.text.isNotEmpty && searchResults.isNotEmpty)
+            ListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: searchResults.length,
+              itemBuilder: (context, index) {
+                final item = searchResults[index];
+                if (item['type'] == 'media') {
+                  final Film film = item['data'];
+                  return ListTile(
+                    leading: SearchIcon(type: 'media', isSerie: film.isSerie),
+                    title: Text(film.title),
+                    onTap: () {
+                      // Navigation
+                    },
+                  );
+                } else if (item['type'] == 'person') {
+                  final Person person = item['data'];
+                  return ListTile(
+                    leading: SearchIcon(type: 'person'),
+                    title: Text(person.name),
+                    onTap: () {
+                      // Navigation
+                    },
+                  );
+                }
+                return Container();
+              },
+            ),
+          if (_searchController.text.isNotEmpty && !searching && searchResults.isEmpty)
+            const Padding(
+              padding: EdgeInsets.only(top: 16),
+              child: Text('Aucun résultat.'),
+            ),
+
+          // ---- Section normale si pas de recherche ----
+          if (_searchController.text.isEmpty) ...[
+            TitreSection(title: "Trending Movies"),
             FilmsList(
               films: films,
               loadMoreFilms: _loadMoreFilms,
             ),
           ],
-        ),
+        ],
       ),
     );
   }

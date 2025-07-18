@@ -32,11 +32,8 @@ class _RecommendationsScreenState extends State<RecommendationsScreen> {
     _loadFilms(); // Load movies from the API on startup
   }
 
-  // Load movies from the API
   Future<void> _loadFilms() async {
     final authApi = AuthApiNode();
-
-    // Load movies for each category
     final recommendedFilmsData = await authApi.getMovies(page: currentPageRecommended);
     final genreFilmsData = await authApi.getMovies(page: currentPageGenre);
     final ifwatchedFilmsData = await authApi.getMovies(page: currentPageIfwatched);
@@ -53,14 +50,9 @@ class _RecommendationsScreenState extends State<RecommendationsScreen> {
     });
   }
 
-  // Pagination function to load more films in each category
   Future<void> _loadMoreFilms(String section) async {
     if (isLoading) return;
-
-    setState(() {
-      isLoading = true;
-    });
-
+    setState(() { isLoading = true; });
     List<Film> filmsToAdd = [];
     if (section == "recommended") {
       final newFilms = await AuthApiNode().getMovies(page: currentPageRecommended);
@@ -75,7 +67,6 @@ class _RecommendationsScreenState extends State<RecommendationsScreen> {
       filmsToAdd = newFilms.take(5).map((filmJson) => Film.fromJson(filmJson)).toList();
       currentPageIfwatched++;
     }
-
     setState(() {
       if (section == "recommended") {
         recommendedFilms.addAll(filmsToAdd);
@@ -95,24 +86,12 @@ class _RecommendationsScreenState extends State<RecommendationsScreen> {
           ? const Center(child: CircularProgressIndicator())
           : ListView(
               children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 15.0),
-                  child: TitreSection(
-                    title: "Movies Based on Your Favorite Genre",
-                    sectionColor: Colors.orangeAccent,
-                  ),
-                ),
+                TitreSection(title: "Movies Based on Your Favorite Genre"),
                 FilmsList(
                   films: genreFilms,
                   loadMoreFilms: () => _loadMoreFilms("genre"),
                 ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 15.0),
-                  child: TitreSection(
-                    title: "Suggestions Based on Your Watched Movies",
-                    sectionColor: Colors.green,
-                  ),
-                ),
+                TitreSection(title: "Suggestions Based on Your Watched Movies"),
                 FilmsList(
                   films: ifwatchedFilms,
                   loadMoreFilms: () => _loadMoreFilms("ifwatched"),

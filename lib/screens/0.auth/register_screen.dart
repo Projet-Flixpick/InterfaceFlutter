@@ -62,8 +62,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
       setState(() {
         _selectedDate = picked;
         _dobController.text = "${picked.day.toString().padLeft(2, '0')}/"
-                              "${picked.month.toString().padLeft(2, '0')}/"
-                              "${picked.year}";
+            "${picked.month.toString().padLeft(2, '0')}/"
+            "${picked.year}";
       });
     }
   }
@@ -117,121 +117,123 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text("Sign Up")),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: SingleChildScrollView(
-          child: Form(
-            key: _formKey,
-            child: Column(
-              children: [
-                Center(
-                  child: Text(
-                    "FlixPick",
-                    style: TextStyle(
-                      fontSize: 40,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.redAccent,
-                    ),
-                    textAlign: TextAlign.center,
+    return SafeArea(
+      child: Scaffold(
+        backgroundColor: Colors.white,
+        body: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24.0),
+          child: SingleChildScrollView(
+            child: Form(
+              key: _formKey,
+              child: Column(
+                children: [
+                  const SizedBox(height: 60),
+                  Image.asset(
+                    'assets/images/Logo_FlixPick_Enter.png',
+                    height: 150,
                   ),
-                ),
-                const SizedBox(height: 20),
-                Image.asset(
-                  'assets/images/Logo_FlixPick.png',
-                  height: 200,
-                  width: 200,
-                ),
-                const SizedBox(height: 20),
-                TextFormField(
-                  controller: _firstnameController,
-                  decoration: const InputDecoration(labelText: "First Name"),
-                ),
-                const SizedBox(height: 12),
-                TextFormField(
-                  controller: _nameController,
-                  decoration: const InputDecoration(labelText: "Last Name"),
-                ),
-                const SizedBox(height: 12),
-                TextFormField(
-                  controller: _emailController,
-                  decoration: const InputDecoration(labelText: "Email"),
-                  validator: (value) => validateEmail(value ?? ""),
-                ),
-                const SizedBox(height: 12),
-                TextFormField(
-                  controller: _passwordController,
-                  obscureText: true,
-                  decoration: const InputDecoration(labelText: "Password"),
-                  validator: (value) => validatePassword(value ?? ""),
-                ),
-                const SizedBox(height: 12),
-                TextFormField(
-                  controller: _confirmPasswordController,
-                  obscureText: true,
-                  decoration: const InputDecoration(labelText: "Confirm Password"),
-                  validator: (value) {
-                    if (value != _passwordController.text) {
-                      return "Passwords do not match.";
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 12),
-                TextFormField(
-                  controller: _dobController,
-                  readOnly: true,
-                  onTap: () => _pickDate(context),
-                  decoration: const InputDecoration(
-                    labelText: "Date of Birth",
-                    hintText: "JJ/MM/AAAA",
+                  Image.asset(
+                    'assets/images/Logo_PopCorn_Solo.png',
+                    height: 200,
                   ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please select your date of birth.';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 20),
-                Row(
-                  children: [
-                    Checkbox(
-                      value: _isAccepted,
-                      onChanged: (bool? value) {
-                        setState(() {
-                          _isAccepted = value ?? false;
-                        });
-                      },
+                  const SizedBox(height: 30),
+                  TextFormField(
+                    controller: _firstnameController,
+                    decoration: const InputDecoration(labelText: "First Name"),
+                  ),
+                  const SizedBox(height: 12),
+                  TextFormField(
+                    controller: _nameController,
+                    decoration: const InputDecoration(labelText: "Last Name"),
+                  ),
+                  const SizedBox(height: 12),
+                  TextFormField(
+                    controller: _emailController,
+                    decoration: const InputDecoration(labelText: "Email"),
+                    validator: (value) => validateEmail(value ?? ""),
+                  ),
+                  const SizedBox(height: 12),
+                  TextFormField(
+                    controller: _passwordController,
+                    obscureText: true,
+                    decoration: const InputDecoration(labelText: "Password"),
+                    validator: (value) => validatePassword(value ?? ""),
+                  ),
+                  const SizedBox(height: 12),
+                  TextFormField(
+                    controller: _confirmPasswordController,
+                    obscureText: true,
+                    decoration: const InputDecoration(labelText: "Confirm Password"),
+                    validator: (value) {
+                      if (value != _passwordController.text) {
+                        return "Passwords do not match.";
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 12),
+                  TextFormField(
+                    controller: _dobController,
+                    readOnly: true,
+                    onTap: () => _pickDate(context),
+                    decoration: const InputDecoration(
+                      labelText: "Date of Birth (optional)",
+                      hintText: "JJ/MM/AAAA",
                     ),
-                    const SizedBox(height: 12),
-                    const Expanded(
-                      child: Wrap(
-                        children: [
-                          Text(
-                            "I have read and accept the terms and privacy policy.",
-                            style: TextStyle(fontSize: 14),
-                          ),
-                        ],
+                    validator: (value) => null,
+                  ),
+                  const SizedBox(height: 20),
+                  Row(
+                    children: [
+                      Checkbox(
+                        value: _isAccepted,
+                        onChanged: (bool? value) {
+                          setState(() {
+                            _isAccepted = value ?? false;
+                          });
+                        },
                       ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 20),
-                if (_errorMessage != null)
-                  Text(
-                    _errorMessage!,
-                    style: const TextStyle(color: Colors.red, fontSize: 14),
+                      const SizedBox(width: 8),
+                      const Expanded(
+                        child: Text(
+                          "I have read and accept the terms and privacy policy.",
+                          style: TextStyle(fontSize: 14),
+                        ),
+                      ),
+                    ],
                   ),
-                const SizedBox(height: 10),
-                ElevatedButton(
-                  onPressed: _isLoading ? null : _onRegister,
-                  child: _isLoading
-                      ? const CircularProgressIndicator(color: Colors.white)
-                      : const Text("Sign Up"),
-                ),
-              ],
+                  const SizedBox(height: 5),
+                  if (_errorMessage != null)
+                    Text(
+                      _errorMessage!,
+                      style: const TextStyle(color: Colors.red, fontSize: 14),
+                    ),
+                  const SizedBox(height: 10),
+                  ElevatedButton(
+                    onPressed: _isLoading ? null : _onRegister,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.redAccent,
+                      padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 12),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    ),
+                    child: _isLoading
+                        ? const CircularProgressIndicator(color: Colors.white)
+                        : const Text("Sign Up", style: TextStyle(fontSize: 16)),
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text("Already an account ?"),
+                      TextButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                        child: const Text("Sign In"),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
         ),
