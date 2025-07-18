@@ -174,14 +174,10 @@ class _ChoisirGenresScreenState extends State<ChoisirGenresScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: const [
-                      TitreSection(
-                        title: 'Select your favorite genres',
-                      ),
-                      ResetButton(),
-                    ],
+                  TitreSection(title: 'Select your favorite genres'),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: ResetButton(onPressed: resetSelection),
                   ),
                   const SizedBox(height: 16),
                   Expanded(
@@ -269,13 +265,13 @@ class _ChoisirGenresScreenState extends State<ChoisirGenresScreen> {
 }
 
 class ResetButton extends StatelessWidget {
-  const ResetButton({super.key});
+  final VoidCallback? onPressed;
+  const ResetButton({super.key, this.onPressed});
 
   @override
   Widget build(BuildContext context) {
-    final parent = context.findAncestorStateOfType<_ChoisirGenresScreenState>();
     return TextButton.icon(
-      onPressed: parent?.resetSelection,
+      onPressed: onPressed,
       icon: const Icon(Icons.refresh, color: Color(0xFFFF5252)),
       label: const Text(
         "Reset",
