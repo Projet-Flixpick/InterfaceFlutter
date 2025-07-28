@@ -13,6 +13,8 @@ import 'providers/film_provider.dart';
 import 'providers/user_provider.dart';
 
 // Screens
+import 'screens/3.profile/admin_screen.dart';
+import 'screens/3.profile/contributeur_screen.dart';
 import 'screens/0.auth/splash_screen.dart';
 import 'screens/1.home/home_screen.dart';
 import 'screens/0.auth/login_screen.dart';
@@ -73,6 +75,8 @@ class MyApp extends StatelessWidget {
           '/friend-requests': (context) => const UserAmisDemandesScreen(),
           '/swipe': (context) => const SwipeHomePage(),
           '/actors': (context) => const ActeursListScreen(),
+          '/admin': (context) => const AdminScreen(),
+          '/contributeur': (context) => const ContributeurScreen(),
         },
         onGenerateRoute: (settings) {
           if (settings.name == ActeurDetailScreen.routeName) {

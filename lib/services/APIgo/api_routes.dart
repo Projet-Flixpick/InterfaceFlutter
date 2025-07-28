@@ -42,4 +42,7 @@ class ApiRoutes {
   static const String getContributions = '$ProtectedUrl/contributions';
   static const String checkContribution = '$ProtectedUrl/checkContribution';
   static const String deleteUserByEmail = '$ProtectedUrl/deleteUserByEmail';
+  static const String deleteContent = '$ProtectedUrl/deleteContent';
+
+
 }

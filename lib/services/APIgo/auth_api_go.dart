@@ -32,7 +32,7 @@ class AuthApiGo {
     }
   }
 
-  /// Connexion d'un utilisateur (sans cache !)
+  /// Connexion d'un utilisateur
   Future<Map<String, dynamic>?> login(String email, String password) async {
     final String url = "$baseUrl/login";
 
