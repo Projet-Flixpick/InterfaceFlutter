@@ -1,10 +1,14 @@
+// lib/screens/3.profile/user_films_statut_screen.dart
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import '../../providers/film_statut_provider.dart';
-import '../../providers/film_provider.dart'; // ⬅️ Pour accéder aux titres
+import '../../providers/film_provider.dart';
+import '../../widgets/titre_section.dart';  // <-- import du widget
 
 class UserFilmsStatutScreen extends StatelessWidget {
-  const UserFilmsStatutScreen({super.key});
+  const UserFilmsStatutScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -17,14 +21,12 @@ class UserFilmsStatutScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              "👍 Liked Movies",
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
+            // Titre “Liked Movies” via le widget TitreSection
+            const TitreSection(title: "👍 Liked Movies"),
             const SizedBox(height: 8),
             Expanded(
               child: filmStatutProvider.likedFilms.isEmpty
-                  ? const Text("No liked movies.")
+                  ? const Center(child: Text("No liked movies."))
                   : Consumer<FilmProvider>(
                       builder: (context, filmProvider, _) {
                         return ListView.builder(
@@ -34,23 +36,25 @@ class UserFilmsStatutScreen extends StatelessWidget {
                             filmProvider.loadTitleIfMissing(filmId);
 
                             return ListTile(
-                              leading: const Icon(Icons.thumb_up, color: Colors.green),
+                              leading:
+                                  const Icon(Icons.thumb_up, color: Colors.green),
                               title: Text(filmProvider.getFilmTitle(filmId)),
+                              onTap: () {
+                                // si besoin, ajoute la navigation ici
+                              },
                             );
                           },
                         );
                       },
                     ),
             ),
-            const SizedBox(height: 20),
-            const Text(
-              "👁️ Watched Movies",
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
+
+            // Titre “Watched Movies” via le widget TitreSection
+            const TitreSection(title: "👁️ Watched Movies"),
             const SizedBox(height: 8),
             Expanded(
               child: filmStatutProvider.seenFilms.isEmpty
-                  ? const Text("No watched movies.")
+                  ? const Center(child: Text("No watched movies."))
                   : Consumer<FilmProvider>(
                       builder: (context, filmProvider, _) {
                         return ListView.builder(
@@ -60,8 +64,12 @@ class UserFilmsStatutScreen extends StatelessWidget {
                             filmProvider.loadTitleIfMissing(filmId);
 
                             return ListTile(
-                              leading: const Icon(Icons.remove_red_eye, color: Colors.blue),
+                              leading: const Icon(Icons.remove_red_eye,
+                                  color: Colors.blue),
                               title: Text(filmProvider.getFilmTitle(filmId)),
+                              onTap: () {
+                                // si besoin, ajoute la navigation ici
+                              },
                             );
                           },
                         );

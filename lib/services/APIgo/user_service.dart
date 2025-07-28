@@ -6,7 +6,7 @@ class UserService {
   final String token;
 
   UserService({required this.token}) {
-    print('[UserService] ✅ Token reçu : $token');
+  // print('[UserService] ✅ Token reçu : $token');
   }
 
   Map<String, String> get _headers => {
@@ -16,42 +16,42 @@ class UserService {
 
   // --- LIKE ---
   Future<bool> likeMovie(String movieId) {
-    print('[LIKE] filmId = $movieId');
+    // print('[LIKE] filmId = $movieId');
     return _postMovieAction(ApiRoutes.addLike, movieId);
   }
 
   Future<bool> deleteLike(String movieId) {
-    print('[DELETE LIKE] filmId = $movieId');
+   // print('[DELETE LIKE] filmId = $movieId');
     return _deleteMovieAction(ApiRoutes.deleteLike, movieId);
   }
 
   // --- DISLIKE ---
   Future<bool> dislikeMovie(String movieId) {
-    print('[DISLIKE] filmId = $movieId');
+    // print('[DISLIKE] filmId = $movieId');
     return _postMovieAction(ApiRoutes.addDislike, movieId);
   }
 
   Future<bool> deleteDislike(String movieId) {
-    print('[DELETE DISLIKE] filmId = $movieId');
+    // print('[DELETE DISLIKE] filmId = $movieId');
     return _deleteMovieAction(ApiRoutes.deleteDislike, movieId);
   }
 
   // --- SEEN ---
   Future<bool> markMovieAsSeen(String movieId) {
-    print('[SEEN] filmId = $movieId');
+    // print('[SEEN] filmId = $movieId');
     return _postMovieAction(ApiRoutes.addSeenMovie, movieId);
   }
 
   Future<bool> deleteSeenMovie(String movieId) {
-    print('[DELETE SEEN] filmId = $movieId');
+    // print('[DELETE SEEN] filmId = $movieId');
     return _deleteMovieAction(ApiRoutes.deleteSeenMovie, movieId);
   }
 
   // --- Utilitaires internes ---
   Future<bool> _postMovieAction(String url, String movieId) async {
-    print('[POST] URL: $url');
-    print('[POST] Headers: $_headers');
-    print('[POST] Body: {"movie_id": {"\$oid": "$movieId"}}');
+    // print('[POST] URL: $url');
+    // print('[POST] Headers: $_headers');
+    // print('[POST] Body: {"movie_id": {"\$oid": "$movieId"}}');
 
     try {
       final response = await http.post(
@@ -70,11 +70,10 @@ class UserService {
       return false;
     }
   }
-
   Future<bool> _deleteMovieAction(String url, String movieId) async {
-    print('[DELETE] URL: $url');
-    print('[DELETE] Headers: $_headers');
-    print('[DELETE] Body: {"movie_id": {"\$oid": "$movieId"}}');
+   // print('[DELETE] URL: $url');
+   // print('[DELETE] Headers: $_headers');
+   // print('[DELETE] Body: {"movie_id": {"\$oid": "$movieId"}}');
 
     try {
       final response = await http.delete(

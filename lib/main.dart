@@ -1,3 +1,5 @@
+// lib/main.dart
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -21,6 +23,9 @@ import 'screens/3.profile/user_genres_screen.dart';
 import 'screens/3.profile/user_films_statut_screen.dart';
 import 'screens/3.profile/user_amis_screen.dart';
 import 'screens/3.profile/user_amis_demandes_screen.dart';
+import 'screens/4.autre/swipe_home.dart';
+import 'screens/4.autre/acteurs_list_screen.dart';
+import 'screens/4.autre/acteur_detail_screen.dart';
 
 import 'theme/theme.dart';
 
@@ -66,6 +71,19 @@ class MyApp extends StatelessWidget {
           '/liked-movies': (context) => const UserFilmsStatutScreen(),
           '/my-friends': (context) => const UserAmisScreen(),
           '/friend-requests': (context) => const UserAmisDemandesScreen(),
+          '/swipe': (context) => const SwipeHomePage(),
+          '/actors': (context) => const ActeursListScreen(),
+        },
+        onGenerateRoute: (settings) {
+          if (settings.name == ActeurDetailScreen.routeName) {
+            // accepte int ou String, convertit en String
+            final raw = settings.arguments;
+            final personId = raw is String ? raw : raw.toString();
+            return MaterialPageRoute(
+              builder: (_) => ActeurDetailScreen(personId: personId),
+            );
+          }
+          return null;
         },
       ),
     );

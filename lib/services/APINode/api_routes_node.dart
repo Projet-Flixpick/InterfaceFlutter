@@ -4,11 +4,10 @@ import '../../models/film_model.dart';
 import '../../models/genre_model.dart';
 import '../../models/person_model.dart';
 
-
 const String baseUrl = 'https://apinode-foo2.onrender.com';
 
 /// ----------------------------
-/// GENRES
+/// 🔹 GENRES
 /// ----------------------------
 
 Future<List<Genre>> fetchGenres() async {
@@ -23,15 +22,15 @@ Future<List<Genre>> fetchGenres() async {
 }
 
 /// ----------------------------
-/// FILMS
+/// 🔹 FILMS
 /// ----------------------------
 
 Future<List<Film>> fetchTopMovies({int page = 1}) async {
   final response = await http.get(Uri.parse('$baseUrl/movies/top?page=$page'));
   if (response.statusCode == 200) {
     final json = jsonDecode(response.body);
-    final list = json['data'] ?? json;
-    return (list as List).map((e) => Film.fromJson(e)).toList();
+    final data = json['data'] ?? json;
+    return (data as List).map((e) => Film.fromJson(e)).toList();
   } else {
     throw Exception('Erreur chargement films les mieux notés');
   }
@@ -41,32 +40,30 @@ Future<List<Film>> fetchPopularMovies({int page = 1}) async {
   final response = await http.get(Uri.parse('$baseUrl/movies/popular?page=$page'));
   if (response.statusCode == 200) {
     final json = jsonDecode(response.body);
-    final list = json['data'] ?? json;
-    return (list as List).map((e) => Film.fromJson(e)).toList();
+    final data = json['data'] ?? json;
+    return (data as List).map((e) => Film.fromJson(e)).toList();
   } else {
     throw Exception('Erreur chargement films populaires');
   }
 }
 
-/*
 Future<List<Film>> fetchWorstMovies({int page = 1}) async {
   final response = await http.get(Uri.parse('$baseUrl/movies/worst?page=$page'));
   if (response.statusCode == 200) {
     final json = jsonDecode(response.body);
-    final list = json['data'] ?? json;
-    return (list as List).map((e) => Film.fromJson(e)).toList();
+    final data = json['data'] ?? json;
+    return (data as List).map((e) => Film.fromJson(e)).toList();
   } else {
     throw Exception('Erreur chargement films mal notés');
   }
 }
-*/
 
 Future<List<Film>> fetchUnvotedMovies({int page = 1}) async {
   final response = await http.get(Uri.parse('$baseUrl/movies/unvoted?page=$page'));
   if (response.statusCode == 200) {
     final json = jsonDecode(response.body);
-    final list = json['data'] ?? json;
-    return (list as List).map((e) => Film.fromJson(e)).toList();
+    final data = json['data'] ?? json;
+    return (data as List).map((e) => Film.fromJson(e)).toList();
   } else {
     throw Exception('Erreur chargement films non notés');
   }
@@ -90,7 +87,7 @@ Future<String?> fetchFilmTitleById(String filmId) async {
 }
 
 /// ----------------------------
-/// SERIES
+/// 🔹 SÉRIES
 /// ----------------------------
 
 Future<List<Film>> fetchTopSeries({int page = 1}) async {
@@ -115,6 +112,17 @@ Future<List<Film>> fetchPopularSeries({int page = 1}) async {
   }
 }
 
+Future<List<Film>> fetchWorstSeries({int page = 1}) async {
+  final response = await http.get(Uri.parse('$baseUrl/series/worst-rated?page=$page'));
+  if (response.statusCode == 200) {
+    final json = jsonDecode(response.body);
+    final data = json['data'] ?? json;
+    return (data as List).map((e) => Film.fromJson(e)).toList();
+  } else {
+    throw Exception('Erreur chargement séries mal notées');
+  }
+}
+
 Future<List<Film>> fetchUnvotedSeries({int page = 1}) async {
   final response = await http.get(Uri.parse('$baseUrl/series/unvoted?page=$page'));
   if (response.statusCode == 200) {
@@ -126,10 +134,8 @@ Future<List<Film>> fetchUnvotedSeries({int page = 1}) async {
   }
 }
 
-
-
 /// ----------------------------
-/// RECHERCHE / AUTRE
+/// 🔹 RECHERCHE
 /// ----------------------------
 
 Future<List<Film>> fetchSearchMedia(String query) async {
@@ -141,10 +147,9 @@ Future<List<Film>> fetchSearchMedia(String query) async {
     final data = json['data'] ?? json;
     return (data as List).map((e) => Film.fromJson(e)).toList();
   } else {
-    throw Exception('Erreur chargement recherche');
+    throw Exception('Erreur chargement recherche de films');
   }
 }
-
 
 Future<List<Person>> fetchSearchPeople(String query) async {
   final response = await http.get(
@@ -155,12 +160,12 @@ Future<List<Person>> fetchSearchPeople(String query) async {
     final data = json['data'] ?? json;
     return (data as List).map((e) => Person.fromJson(e)).toList();
   } else {
-    throw Exception('Erreur chargement recherche personnes');
+    throw Exception('Erreur chargement recherche de personnes');
   }
 }
 
 /// ----------------------------
-/// ACTEURS
+/// 🔹 ACTEURS
 /// ----------------------------
 
 Future<List<Person>> fetchAllPeople() async {

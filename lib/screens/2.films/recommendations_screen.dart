@@ -29,7 +29,7 @@ class _RecommendationsScreenState extends State<RecommendationsScreen> {
   @override
   void initState() {
     super.initState();
-    _loadFilms(); // Load movies from the API on startup
+    _loadFilms();
   }
 
   Future<void> _loadFilms() async {

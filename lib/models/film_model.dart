@@ -1,3 +1,5 @@
+// lib/models/film_model.dart
+
 class Film {
   final String mongoId;
   final int id;
@@ -44,35 +46,59 @@ class Film {
             : 'https://via.placeholder.com/100x150?text=No+Image';
 
   factory Film.fromJson(Map<String, dynamic> json) {
+    final rawId = json['id'];
+    final id = rawId is int
+        ? rawId
+        : rawId is String
+            ? int.tryParse(rawId) ?? 0
+            : 0;
+
+    final genreIds = (json['genre_ids'] as List<dynamic>?)
+            ?.map((e) {
+              if (e is int) return e;
+              if (e is String) return int.tryParse(e) ?? 0;
+              return 0;
+            })
+            .toList() ??
+        [];
+
+    final genres = (json['genres'] as List<dynamic>?)
+            ?.map((e) => e.toString())
+            .toList() ??
+        [];
+    final popularity = (json['popularity'] as num?)?.toDouble() ?? 0.0;
+    final voteAverage = (json['vote_average'] as num?)?.toDouble() ?? 0.0;
+    final voteCount = json['vote_count'] is int
+        ? json['vote_count'] as int
+        : json['vote_count'] is String
+            ? int.tryParse(json['vote_count']) ?? 0
+            : 0;
+
+    final isSerie = (json['type'] as String?)?.toLowerCase() == 'serie';
+
     return Film(
-      mongoId: json['_id'] ?? '',
-      id: json['id'] ?? 0,
-      title: json['title'] ?? 'Titre inconnu',
-      originalTitle: json['original_title'] ?? '',
-      overview: json['overview'] ?? '',
-      releaseDate: json['release_date'] ?? '0000-00-00',
-      posterPath: json['poster_path'] ?? '',
-      genres: (json['genres'] as List<dynamic>?)
-              ?.map((genre) => genre.toString())
-              .toList() ??
-          [],
-      genreIds: (json['genre_ids'] as List<dynamic>?)
-              ?.map((id) => id as int)
-              .toList() ??
-          [],
-      popularity: (json['popularity'] as num?)?.toDouble() ?? 0.0,
-      voteAverage: (json['vote_average'] as num?)?.toDouble() ?? 0.0,
-      voteCount: json['vote_count'] ?? 0,
-      originalLanguage: json['original_language'] ?? '',
-      isAdult: json['adult'] ?? false,
-      backdropPath: json['backdrop_path'] ?? '',
-      isVideo: json['video'] ?? false,
-      providers: json['providers'],
+      mongoId: json['_id'] as String? ?? '',
+      id: id,
+      title: json['title'] as String? ?? 'Titre inconnu',
+      originalTitle: json['original_title'] as String? ?? '',
+      overview: json['overview'] as String? ?? '',
+      releaseDate: json['release_date'] as String? ?? '',
+      posterPath: json['poster_path'] as String? ?? '',
+      genres: genres,
+      genreIds: genreIds,
+      popularity: popularity,
+      voteAverage: voteAverage,
+      voteCount: voteCount,
+      originalLanguage: json['original_language'] as String? ?? '',
+      isAdult: json['adult'] as bool? ?? false,
+      backdropPath: json['backdrop_path'] as String? ?? '',
+      isVideo: json['video'] as bool? ?? false,
+      providers: json['providers'] as Map<String, dynamic>?,
       cast: (json['cast'] as List<dynamic>?)
-              ?.map((actorJson) => Cast.fromJson(actorJson))
+              ?.map((actorJson) => Cast.fromJson(actorJson as Map<String, dynamic>))
               .toList() ??
           [],
-      isSerie: json['type'] == 'serie'
+      isSerie: isSerie,
     );
   }
 }
@@ -93,12 +119,19 @@ class Cast {
   });
 
   factory Cast.fromJson(Map<String, dynamic> json) {
+    final rawId = json['id'];
+    final id = rawId is int
+        ? rawId
+        : rawId is String
+            ? int.tryParse(rawId) ?? 0
+            : 0;
+
     return Cast(
-      mongoId: json['_id'] ?? '',
-      id: json['id'] ?? 0,
-      name: json['name'] ?? 'Acteur inconnu',
-      character: json['character'] ?? '',
-      profilePath: json['profile_path'],
+      mongoId: json['_id'] as String? ?? '',
+      id: id,
+      name: json['name'] as String? ?? 'Acteur inconnu',
+      character: json['character'] as String? ?? '',
+      profilePath: json['profile_path'] as String?,
     );
   }
 }
