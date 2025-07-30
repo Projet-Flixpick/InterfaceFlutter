@@ -1,3 +1,5 @@
+// lib/services/APIgo/friend_request_service.dart
+
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'api_routes.dart';
@@ -12,50 +14,58 @@ class FriendRequestService {
         'Authorization': 'Bearer $token',
       };
 
+  /// Envoie une demande d’amitié à l’adresse [targetEmail].
+  Future<bool> sendFriendRequest(String targetEmail) async {
+    final response = await http.post(
+      Uri.parse(ApiRoutes.addFriendRequest),
+      headers: _headers,
+      body: jsonEncode({'email_invite': targetEmail}),
+    );
+    return response.statusCode == 200;
+  }
+
   Future<List<Map<String, dynamic>>> getFriends(String userId) async {
-    final response = await http.get(
+    final res = await http.get(
       Uri.parse('${ApiRoutes.getFriends}?userId=$userId'),
       headers: _headers,
     );
-    if (response.statusCode == 200) {
-      final List data = json.decode(response.body);
+    if (res.statusCode == 200) {
+      final data = json.decode(res.body) as List;
       return data.cast<Map<String, dynamic>>();
-    } else {
-      throw Exception('Erreur récupération amis');
     }
+    throw Exception('Erreur récupération amis');
   }
 
   Future<List<Map<String, dynamic>>> getPendingRequests(String userId) async {
-    final response = await http.get(
+    final res = await http.get(
       Uri.parse('${ApiRoutes.getFriendRequests}?userId=$userId'),
       headers: _headers,
     );
-    if (response.statusCode == 200) {
-      final List data = json.decode(response.body);
+    if (res.statusCode == 200) {
+      final data = json.decode(res.body) as List;
       return data.cast<Map<String, dynamic>>();
-    } else {
-      throw Exception('Erreur récupération demandes');
     }
+    throw Exception('Erreur récupération demandes');
   }
 
-  Future<bool> respondToFriendRequest(String senderId, bool accept) async {
-    final response = await http.post(
+  Future<bool> respondToFriendRequest(String senderEmail, bool accept) async {
+    final res = await http.post(
       Uri.parse(ApiRoutes.friendRequestResponse),
       headers: _headers,
       body: jsonEncode({
-        'user_id_sender': senderId,
-        'response': accept ? 1 : 0,
+        'sender_email': senderEmail,
+        'status': accept ? 1 : 0,
       }),
     );
-    return response.statusCode == 200;
+    return res.statusCode == 200;
   }
 
-  Future<bool> deleteFriend(String friendId) async {
-    final response = await http.post(
+  Future<bool> deleteFriend(String otherEmail) async {
+    final res = await http.post(
       Uri.parse(ApiRoutes.deleteFriend),
       headers: _headers,
-      body: jsonEncode({'friend_id': friendId}),
+      body: jsonEncode({'other_email': otherEmail}),
     );
-    return response.statusCode == 200;
+    return res.statusCode == 200;
   }
 }

@@ -56,7 +56,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           body: ListView(
             padding: const EdgeInsets.all(16),
             children: [
-              // --- En-tête du profil ---
+              // --- Informations utilisateur ---
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -153,9 +153,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 },
               ),
 
-              const Divider(),
-
               // --- Section Contributeur (si rôle == 1) ---
+              
+              
               if (isContributor)
                 ListTile(
                   leading: const Icon(Icons.video_library),
