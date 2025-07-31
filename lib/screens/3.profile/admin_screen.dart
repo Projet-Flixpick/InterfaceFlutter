@@ -22,8 +22,9 @@ class _AdminScreenState extends State<AdminScreen> {
   final _emailDelCtrl   = TextEditingController();
   final _emailRoleCtrl  = TextEditingController();
   final _contentDelCtrl = TextEditingController();
+
   String? _selectedRole;
-  final _roleOptions = ['user', 'contributeur', 'admin'];
+  final _roleOptions = ['user', 'contributor', 'admin'];
 
   @override
   void initState() {
@@ -47,7 +48,7 @@ class _AdminScreenState extends State<AdminScreen> {
       setState(() => _loadingContributions = false);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text("Erreur chargement : ${resp.statusCode}"),
+          content: Text("Error loading : ${resp.statusCode}"),
           backgroundColor: Colors.red,
         ),
       );
@@ -63,15 +64,15 @@ class _AdminScreenState extends State<AdminScreen> {
         builder: (ctx) {
           final ctrl = TextEditingController();
           return AlertDialog(
-            title: const Text("Raison du refus (max 100 chars)"),
+            title: const Text("Reason for Rejection (max 100 chars)"),
             content: TextField(
               controller: ctrl,
               maxLength: 100,
-              decoration: const InputDecoration(hintText: "Ex : Film déjà existant"),
+              decoration: const InputDecoration(hintText: "E.g.: Film already exists"),
             ),
             actions: [
-              TextButton(onPressed: () => Navigator.pop(ctx, null), child: const Text("Annuler")),
-              TextButton(onPressed: () => Navigator.pop(ctx, ctrl.text.trim()), child: const Text("Envoyer")),
+              TextButton(onPressed: () => Navigator.pop(ctx, null), child: const Text("Cancel")),
+              TextButton(onPressed: () => Navigator.pop(ctx, ctrl.text.trim()), child: const Text("Send")),
             ],
           );
         },
@@ -104,14 +105,14 @@ class _AdminScreenState extends State<AdminScreen> {
       });
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(accept ? 'Contribution approuvée.' : 'Contribution rejetée.'),
+          content: Text(accept ? 'Contribution approved.' : 'Contribution rejected.'),
           backgroundColor: Colors.green,
         ),
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text("Échec réponse : ${resp.statusCode}"),
+          content: Text("Cannot respond : ${resp.statusCode}"),
           backgroundColor: Colors.red,
         ),
       );
@@ -139,14 +140,14 @@ class _AdminScreenState extends State<AdminScreen> {
       setState(() => _selectedRole = null);
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text("Droits mis à jour."),
+          content: Text("Rights updated."),
           backgroundColor: Colors.green,
         ),
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text("Échec mise à jour : ${resp.statusCode}"),
+          content: Text("Cannot update rights : ${resp.statusCode}"),
           backgroundColor: Colors.red,
         ),
       );
@@ -169,14 +170,14 @@ class _AdminScreenState extends State<AdminScreen> {
       _emailDelCtrl.clear();
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text("Utilisateur supprimé."),
+          content: Text("User deleted."),
           backgroundColor: Colors.green,
         ),
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text("Échec suppression : ${resp.statusCode}"),
+          content: Text("Cannot delete user : ${resp.statusCode}"),
           backgroundColor: Colors.red,
         ),
       );
@@ -199,14 +200,14 @@ class _AdminScreenState extends State<AdminScreen> {
       _contentDelCtrl.clear();
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text("Contenu supprimé."),
+          content: Text("Content deleted."),
           backgroundColor: Colors.green,
         ),
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text("Échec suppression : ${resp.statusCode}"),
+          content: Text("Cannot delete content : ${resp.statusCode}"),
           backgroundColor: Colors.red,
         ),
       );
@@ -216,13 +217,15 @@ class _AdminScreenState extends State<AdminScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Espace Administrateur")),
+      appBar: AppBar(title: const Text("Admin Dashboard")),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+
+          // Propose Content link
           ListTile(
             leading: const Icon(Icons.library_add),
-            title: const Text('Proposer un contenu'),
+            title: const Text('Propose Content'),
             onTap: () => Navigator.push(
               context,
               MaterialPageRoute(builder: (_) => const ContributeurScreen()),
@@ -232,12 +235,13 @@ class _AdminScreenState extends State<AdminScreen> {
           const SizedBox(height: 16),
           const Divider(),
 
-          const TitreSection(title: "Contributions en attente"),
+          // Pending Contributions section
+          const TitreSection(title: "Pending Contributions"),
           const SizedBox(height: 8),
           if (_loadingContributions)
             const Center(child: CircularProgressIndicator())
           else if (_contributions.isEmpty)
-            const Text("Aucune contribution en attente.")
+            const Text("No pending contributions.")
           else
             ListView.builder(
               shrinkWrap: true,
@@ -254,7 +258,7 @@ class _AdminScreenState extends State<AdminScreen> {
                   margin: const EdgeInsets.symmetric(vertical: 8),
                   child: ListTile(
                     title: Text(title),
-                    subtitle: Text("Proposé par : $email"),
+                    subtitle: Text("Proposed by: $email"),
                     trailing: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
@@ -276,35 +280,53 @@ class _AdminScreenState extends State<AdminScreen> {
           const SizedBox(height: 24),
           const Divider(),
 
-          const TitreSection(title: "Gestion des utilisateurs"),
+          // User Management
+          const TitreSection(title: "User Management"),
           const SizedBox(height: 8),
-          const Text("Utilisateur à supprimer (email)"),
-          TextField(controller: _emailDelCtrl, decoration: const InputDecoration(hintText: "user33@example.com")),
+
+          TextField(
+            controller: _emailDelCtrl,
+            decoration: const InputDecoration(
+              labelText: "User to delete (email)",
+              hintText: "user33@example.com",
+            ),
+          ),
           const SizedBox(height: 8),
-          ElevatedButton(onPressed: _deleteUser, child: const Text("Supprimer")),
+          ElevatedButton(onPressed: _deleteUser, child: const Text("Delete")),
 
           const SizedBox(height: 16),
-          const Text("Utilisateur à modifier (email + rôle)"),
-          TextField(controller: _emailRoleCtrl, decoration: const InputDecoration(hintText: "user33@example.com")),
+          TextField(
+            controller: _emailRoleCtrl,
+            decoration: const InputDecoration(
+              labelText: "User to modify (email + role)",
+              hintText: "user33@example.com",
+            ),
+          ),
           const SizedBox(height: 8),
           DropdownButton<String>(
             value: _selectedRole,
-            hint: const Text("Choisir un rôle"),
+            hint: const Text("Choose a role"),
             items: _roleOptions.map((r) => DropdownMenuItem(value: r, child: Text(r))).toList(),
             onChanged: (v) => setState(() => _selectedRole = v),
           ),
           const SizedBox(height: 8),
-          ElevatedButton(onPressed: _changeUserRole, child: const Text("Mettre à jour")),
+          ElevatedButton(onPressed: _changeUserRole, child: const Text("Update")),
 
           const SizedBox(height: 24),
           const Divider(),
 
-          const TitreSection(title: "Supprimer un film/série/court-métrage"),
+          // Delete Content
+          const TitreSection(title: "Delete a movie/series/short film"),
           const SizedBox(height: 8),
-          const Text("ID du contenu à supprimer"),
-          TextField(controller: _contentDelCtrl, decoration: const InputDecoration(hintText: "685562eed269aa77365e73da")),
+          TextField(
+            controller: _contentDelCtrl,
+            decoration: const InputDecoration(
+              labelText: "ID of the content to delete",
+              hintText: "685562eed269aa77365e73da",
+            ),
+          ),
           const SizedBox(height: 8),
-          ElevatedButton(onPressed: _deleteContent, child: const Text("Supprimer")),
+          ElevatedButton(onPressed: _deleteContent, child: const Text("Delete")),
         ]),
       ),
     );

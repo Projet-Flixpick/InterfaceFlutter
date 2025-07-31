@@ -56,7 +56,7 @@ class _ContributeurScreenState extends State<ContributeurScreen> {
       setState(() => _loading = false);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text("Erreur chargement : ${resp.statusCode}"),
+          content: Text("Loading Error : ${resp.statusCode}"),
           backgroundColor: Colors.red,
         ),
       );
@@ -102,7 +102,7 @@ class _ContributeurScreenState extends State<ContributeurScreen> {
             return AlertDialog(
               backgroundColor: Colors.white,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              title: const Text("Proposer un contenu", style: TextStyle(color: Colors.red)),
+              title: const Text("Propose a Content", style: TextStyle(color: Colors.red)),
               content: SizedBox(
                 width: double.maxFinite,
                 height: 300,
@@ -115,11 +115,11 @@ class _ContributeurScreenState extends State<ContributeurScreen> {
                       title: Text(g.name),
                       trailing: isSel
                           ? SizedBox(
-                              width: 24,
-                              height: 24,
+                              width: 32,
+                              height: 32,
                               child: Image.asset('assets/icones/popcorn_check.png'),
                             )
-                          : const SizedBox(width: 24, height: 24),
+                          : const SizedBox(width: 32, height: 32),
                       onTap: () {
                         if (isSel)
                           selected.remove(g.id);
@@ -132,7 +132,7 @@ class _ContributeurScreenState extends State<ContributeurScreen> {
                 ),
               ),
               actions: [
-                TextButton(onPressed: () => Navigator.pop(ctx), child: const Text("Annuler", style: TextStyle(color: Colors.red))),
+                TextButton(onPressed: () => Navigator.pop(ctx), child: const Text("Cancel", style: TextStyle(color: Colors.red))),
                 TextButton(onPressed: () => Navigator.pop(ctx, selected), child: const Text("OK", style: TextStyle(color: Colors.red))),
               ],
             );
@@ -149,7 +149,7 @@ class _ContributeurScreenState extends State<ContributeurScreen> {
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate() || _selectedGenreIds.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Veuillez remplir tous les champs"), backgroundColor: Colors.red),
+        const SnackBar(content: Text("Please fill in all fields"), backgroundColor: Colors.red),
       );
       return;
     }
@@ -180,7 +180,7 @@ class _ContributeurScreenState extends State<ContributeurScreen> {
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Échec envoi : ${resp.statusCode}"), backgroundColor: Colors.red),
+        SnackBar(content: Text("Failed to send : ${resp.statusCode}"), backgroundColor: Colors.red),
       );
     }
   }
@@ -188,11 +188,11 @@ class _ContributeurScreenState extends State<ContributeurScreen> {
   String _mapStatus(int s) {
     switch (s) {
       case 0:
-        return "En attente";
+        return "Pending";
       case 1:
-        return "Accepté";
+        return "Accepted";
       case 2:
-        return "Rejeté";
+        return "Rejected";
       default:
         return s.toString();
     }
@@ -203,18 +203,18 @@ class _ContributeurScreenState extends State<ContributeurScreen> {
     final genres = Provider.of<GenreProvider>(context).genres;
 
     return Scaffold(
-      appBar: AppBar(title: const Text("Espace Contributeur")),
+      appBar: AppBar(title: const Text("Contributor Space")),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          const TitreSection(title: "Proposer un contenu"),
+          const TitreSection(title: "Propose a Content"),
           Form(
             key: _formKey,
             child: Column(children: [
               TextFormField(
                 controller: _titleCtrl,
-                decoration: const InputDecoration(labelText: "Titre *"),
-                validator: (v) => (v == null || v.isEmpty) ? "Obligatoire" : null,
+                decoration: const InputDecoration(labelText: "Title *"),
+                validator: (v) => (v == null || v.isEmpty) ? "Required" : null,
               ),
               const SizedBox(height: 8),
               TextFormField(
@@ -223,8 +223,8 @@ class _ContributeurScreenState extends State<ContributeurScreen> {
                 maxLength: 3000,
                 decoration: const InputDecoration(labelText: "Description (max 3000 chars) *"),
                 validator: (v) {
-                  if (v == null || v.isEmpty) return "Obligatoire";
-                  if (v.length > 3000) return "3000 caractères max";
+                  if (v == null || v.isEmpty) return "Required";
+                  if (v.length > 3000) return "3000 characters max";
                   return null;
                 },
               ),
@@ -232,18 +232,18 @@ class _ContributeurScreenState extends State<ContributeurScreen> {
               TextFormField(
                 controller: _releaseDateCtrl,
                 readOnly: true,
-                decoration: const InputDecoration(labelText: "Date de sortie *", hintText: "YYYY-MM-DD"),
+                decoration: const InputDecoration(labelText: "Release Date *", hintText: "YYYY-MM-DD"),
                 onTap: _pickDate,
-                validator: (v) => (v == null || v.isEmpty) ? "Obligatoire" : null,
+                validator: (v) => (v == null || v.isEmpty) ? "Required" : null,
               ),
               const SizedBox(height: 8),
               DropdownButtonFormField<String>(
                 value: _selectedType,
                 decoration: const InputDecoration(labelText: "Type *"),
                 items: const [
-                  DropdownMenuItem(value: 'film', child: Text('Film')),
-                  DropdownMenuItem(value: 'série', child: Text('Série')),
-                  DropdownMenuItem(value: 'court', child: Text('Court-métrage')),
+                  DropdownMenuItem(value: 'film', child: Text('Movie')),
+                  DropdownMenuItem(value: 'série', child: Text('Series')),
+                  DropdownMenuItem(value: 'court', child: Text('Short Film')),
                 ],
                 onChanged: (v) => setState(() => _selectedType = v!),
               ),
@@ -254,7 +254,7 @@ class _ContributeurScreenState extends State<ContributeurScreen> {
                   onPressed: _pickGenres,
                   child: Text(
                     _selectedGenreIds.isEmpty
-                        ? "Sélectionner jusqu’à 4 genres *"
+                        ? "Select up to 4 genres *"
                         : "Genres : " +
                             genres
                                 .where((g) => _selectedGenreIds.contains(g.id))
@@ -265,20 +265,20 @@ class _ContributeurScreenState extends State<ContributeurScreen> {
                 ),
               ),
               const SizedBox(height: 16),
-              Center(child: ElevatedButton(onPressed: _submit, child: const Text("Soumettre"))),
+              Center(child: ElevatedButton(onPressed: _submit, child: const Text("Submit"))),
             ]),
           ),
 
           const SizedBox(height: 24),
           const Divider(),
 
-          const TitreSection(title: "Mes contributions"),
+          const TitreSection(title: "My contributions"),
           const SizedBox(height: 8),
           Expanded(
             child: _loading
                 ? const Center(child: CircularProgressIndicator())
                 : _myContribs.isEmpty
-                    ? const Center(child: Text("Aucune contribution."))
+                    ? const Center(child: Text("No contributions."))
                     : ListView.builder(
                         itemCount: _myContribs.length,
                         itemBuilder: (ctx, i) {
