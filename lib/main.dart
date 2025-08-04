@@ -5,14 +5,15 @@ import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 
-// Providers
+// Providers existants
 import 'providers/genre_provider.dart';
 import 'providers/film_statut_provider.dart';
 import 'providers/auth_provider.dart';
 import 'providers/film_provider.dart';
 import 'providers/user_provider.dart';
+import 'providers/friend_provider.dart';
 
-// Screens
+// Screens existants
 import 'screens/3.profile/admin_screen.dart';
 import 'screens/3.profile/contributeur_screen.dart';
 import 'screens/0.auth/splash_screen.dart';
@@ -27,7 +28,10 @@ import 'screens/4.autre/swipe_home.dart';
 import 'screens/4.autre/acteurs_list_screen.dart';
 import 'screens/4.autre/acteur_detail_screen.dart';
 
-
+// Écrans amis
+import 'screens/3.profile/friends_screen.dart';
+import 'screens/3.profile/friend_request_screen.dart';
+import 'screens/3.profile/add_friend_screen.dart';
 
 import 'theme/theme.dart';
 
@@ -49,6 +53,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => GenreProvider()..loadGenres()),
         ChangeNotifierProvider(create: (_) => FilmStatutProvider()),
         ChangeNotifierProvider(create: (_) => FilmProvider()),
+        ChangeNotifierProvider(create: (_) => FriendProvider()),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
@@ -64,21 +69,25 @@ class MyApp extends StatelessWidget {
         ],
         home: const SplashScreen(),
         routes: {
-          '/home': (context) => const HomeScreen(),
-          '/login': (context) => const LoginScreen(),
-          '/register': (context) => const RegisterScreen(),
-          '/select-genres': (context) => const ChoisirGenresScreen(),
-          '/profile': (context) => const ProfileScreen(),
-          '/my-genres': (context) => const UserGenresScreen(),
-          '/liked-movies': (context) => const UserFilmsStatutScreen(),
-          '/swipe': (context) => const SwipeHomePage(),
-          '/actors': (context) => const ActeursListScreen(),
-          '/admin': (context) => const AdminScreen(),
-          '/contributeur': (context) => const ContributeurScreen(),
+          '/home':             (context) => const HomeScreen(),
+          '/login':            (context) => const LoginScreen(),
+          '/register':         (context) => const RegisterScreen(),
+          '/select-genres':    (context) => const ChoisirGenresScreen(),
+          '/profile':          (context) => const ProfileScreen(),
+          '/my-genres':        (context) => const UserGenresScreen(),
+          '/liked-movies':     (context) => const UserFilmsStatutScreen(),
+          '/swipe':            (context) => const SwipeHomePage(),
+          '/actors':           (context) => const ActeursListScreen(),
+          '/admin':            (context) => const AdminScreen(),
+          '/contributeur':     (context) => const ContributeurScreen(),
+
+          // Routes pour les amis
+          '/my-friends':       (context) => const FriendsScreen(),
+          '/friend-requests':  (context) => const FriendRequestScreen(),
+          '/add-friend':       (context) => const AddFriendScreen(),
         },
         onGenerateRoute: (settings) {
           if (settings.name == ActeurDetailScreen.routeName) {
-            // accepte int ou String, convertit en String
             final raw = settings.arguments;
             final personId = raw is String ? raw : raw.toString();
             return MaterialPageRoute(

@@ -10,9 +10,11 @@ import 'screens/3.profile/user_genres_screen.dart';
 import 'screens/3.profile/user_films_statut_screen.dart';
 import 'screens/3.profile/user_amis_screen.dart';
 
-// Nouveaux imports
+// Nouveaux imports pour la gestion d'amis
 import 'screens/3.profile/user_amis_demandes_screen.dart';
 import 'screens/3.profile/add_friend_screen.dart';
+
+// Nouvel import pour les recommandations
 import 'screens/2.films/recommendations_screen.dart';
 
 final Map<String, WidgetBuilder> appRoutes = {
@@ -24,9 +26,7 @@ final Map<String, WidgetBuilder> appRoutes = {
   '/my-genres':          (ctx) => const UserGenresScreen(),
   '/liked-movies':       (ctx) => const UserFilmsStatutScreen(),
   '/my-friends':         (ctx) => const UserAmisScreen(),
-
-  // --- Routes Amis ---
-  '/add-friend':             (ctx) => const AddFriendScreen(),
-  '/friend-requests':        (ctx) => const UserAmisDemandesScreen(),
-  '/friend-recommendations': (ctx) => const RecommendationsScreen(),
+  '/friend-requests':    (ctx) => const UserAmisDemandesScreen(),
+  '/add-friend':         (ctx) => const AddFriendScreen(),
+  '/recommendations':    (ctx) => const RecommendationsScreen(),
 };

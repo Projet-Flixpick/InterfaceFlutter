@@ -24,10 +24,12 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   Future<void> _checkLoginStatus() async {
+    print(">>> SPLASH _checkLoginStatus called");
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('jwt_token');
+    print(">>> Token = $token");
 
-    await Future.delayed(const Duration(seconds: 3)); // petit effet de pause
+    await Future.delayed(const Duration(seconds: 2)); // effet de pause
 
     if (token != null && token.split('.').length == 3) {
       print("🔁 Session existante trouvée, synchronisation en cours...");
@@ -39,24 +41,45 @@ class _SplashScreenState extends State<SplashScreen> {
         filmProvider: Provider.of<FilmStatutProvider>(context, listen: false),
       );
 
-      Navigator.pushReplacement(
+      if (!mounted) return;
+      print(">>> Navigating to HomeScreen (reset stack)");
+      Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(builder: (context) => const HomeScreen()),
+        (route) => false,
       );
     } else {
       print("🔓 Aucun token valide trouvé. Redirection vers Login.");
-      Navigator.pushReplacement(
+      if (!mounted) return;
+      Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(builder: (context) => const LoginScreen()),
+        (route) => false,
       );
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    print("=== SplashScreen build ===");
     return const Scaffold(
+      backgroundColor: Colors.white,
       body: Center(
-        child: AnimatedLogo(),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            AnimatedLogo(),
+            SizedBox(height: 32),
+            Text(
+              "Chargement...",
+              style: TextStyle(
+                color: Colors.redAccent,
+                fontWeight: FontWeight.bold,
+                fontSize: 20,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

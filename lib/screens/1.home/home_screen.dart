@@ -1,5 +1,3 @@
-// lib/screens/1.home/home_screen.dart
-
 import 'package:flutter/material.dart';
 
 // Widgets
@@ -82,6 +80,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 preferredSize: Size.fromHeight(16),
                 child: SizedBox(height: 16),
               ),
+              automaticallyImplyLeading: false, // SUPPRIME LA FLÈCHE sur Home
             )
           : TopScreenTitle(title: _titles[_selectedIndex]),
       body: IndexedStack(

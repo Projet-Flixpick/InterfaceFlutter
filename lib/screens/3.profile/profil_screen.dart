@@ -1,21 +1,18 @@
-// lib/screens/3.profile/profil_screen.dart
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-// Providers
+// Provider utilisateur
 import '../../providers/user_provider.dart';
 
-// Screens de profil
+// Écrans de profil
 import '../0.auth/login_screen.dart';
 import 'user_genres_screen.dart';
 import 'user_films_statut_screen.dart';
 import 'user_settings_screen.dart';
-
-// Nouveaux écrans Admin / Contributeur
 import 'admin_screen.dart';
 import 'contributeur_screen.dart';
+
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({Key? key}) : super(key: key);
@@ -31,21 +28,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
     Provider.of<UserProvider>(context, listen: false).loadUser();
   }
 
-  void _logout() async {
+  Future<void> _logout() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('jwt_token');
-    if (context.mounted) {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => const LoginScreen()),
-      );
-    }
+    if (!mounted) return;
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(builder: (_) => const LoginScreen()),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Consumer<UserProvider>(
       builder: (context, userProvider, _) {
-        // On utilise le champ 'rights' : 0=user, 1=contributeur, 2=admin
         final rights = userProvider.rights;
         final isAdmin = rights == 2;
         final isContributor = rights == 1;
@@ -55,7 +50,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           body: ListView(
             padding: const EdgeInsets.all(16),
             children: [
-              // --- Informations utilisateur ---
+              // --- Infos utilisateur ---
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -71,7 +66,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      Text("${userProvider.prenom} ${userProvider.nom}"),
+                      Text('${userProvider.prenom} ${userProvider.nom}'),
                       Text(
                         userProvider.email,
                         style: const TextStyle(color: Colors.grey),
@@ -80,22 +75,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                 ],
               ),
-
               const SizedBox(height: 20),
 
               // --- Statistiques ---
               const Text(
-                "Statistics",
+                'Statistics',
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
-              _statRow("Liked movies", userProvider.likesCount.toString()),
-              _statRow("Watched movies", userProvider.seenCount.toString()),
+              _statRow('Liked movies', userProvider.likesCount.toString()),
+              _statRow('Watched movies', userProvider.seenCount.toString()),
               _statRow(
-                "Genres selected",
+                'Genres selected',
                 userProvider.genres.length.toString(),
               ),
-
               const Divider(height: 32),
 
               // --- Sections standard ---
@@ -103,93 +96,66 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 leading: const Icon(Icons.category),
                 title: const Text('My favorite genres'),
                 trailing: const Icon(Icons.arrow_forward_ios),
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => const UserGenresScreen(),
-                    ),
-                  );
-                },
+                onTap: () => Navigator.pushNamed(context, '/my-genres'),
               ),
               ListTile(
                 leading: const Icon(Icons.movie),
                 title: const Text('My liked / watched movies'),
                 trailing: const Icon(Icons.arrow_forward_ios),
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => const UserFilmsStatutScreen(),
-                    ),
-                  );
-                },
+                onTap: () => Navigator.pushNamed(context, '/liked-movies'),
               ),
-              /*
+
+              // --- Section Amis ---
               ListTile(
-                leading: const Icon(Icons.people),
+                leading: const Icon(Icons.group),
                 title: const Text('My friends'),
                 trailing: const Icon(Icons.arrow_forward_ios),
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => const UserAmisScreen(),
-                    ),
-                  );
-                },
-              ), */
+                onTap: () => Navigator.pushNamed(context, '/my-friends'),
+              ),
 
+              // --- Paramètres ---
+              const Divider(height: 32),
               ListTile(
                 leading: const Icon(Icons.settings),
                 title: const Text('Settings'),
                 trailing: const Icon(Icons.arrow_forward_ios),
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => const UserSettingsScreen(),
-                    ),
-                  );
-                },
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const UserSettingsScreen(),
+                  ),
+                ),
               ),
 
-              // --- Section Contributeur (si rôle == 1) ---
-              
-              
+              // --- Espace Contributeur ---
               if (isContributor)
                 ListTile(
                   leading: const Icon(Icons.video_library),
                   title: const Text('Contributions'),
                   subtitle: const Text('Espace contributeur'),
                   trailing: const Icon(Icons.arrow_forward_ios),
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const ContributeurScreen(),
-                      ),
-                    );
-                  },
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const ContributeurScreen(),
+                    ),
+                  ),
                 ),
 
-              // --- Section Admin (si rôle == 2) ---
+              // --- Espace Admin ---
               if (isAdmin)
                 ListTile(
                   leading: const Icon(Icons.admin_panel_settings),
                   title: const Text('Administration'),
-                  subtitle: const Text(
-                    'Gérer les contributions et utilisateurs',
-                  ),
+                  subtitle:
+                      const Text('Gérer les contributions et utilisateurs'),
                   trailing: const Icon(Icons.arrow_forward_ios),
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const AdminScreen(),
-                      ),
-                    );
-                  },
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const AdminScreen(),
+                    ),
+                  ),
                 ),
 
               // --- Déconnexion ---
@@ -206,26 +172,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _statRow(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(
-        children: [
-          Expanded(child: Text(label)),
-          Text(value, style: const TextStyle(fontWeight: FontWeight.bold)),
-        ],
-      ),
-    );
-  }
+  Widget _statRow(String label, String value) => Padding(
+        padding: const EdgeInsets.symmetric(vertical: 4),
+        child: Row(
+          children: [
+            Expanded(child: Text(label)),
+            Text(value, style: const TextStyle(fontWeight: FontWeight.bold)),
+          ],
+        ),
+      );
 
   String _mapRights(int rights) {
     switch (rights) {
       case 1:
-        return "Contributor";
+        return 'Contributor';
       case 2:
-        return "Administrator";
+        return 'Administrator';
       default:
-        return "User";
+        return 'User';
     }
   }
 
