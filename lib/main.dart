@@ -23,11 +23,11 @@ import 'screens/4.autre/choisir_genres_screen.dart';
 import 'screens/3.profile/profil_screen.dart';
 import 'screens/3.profile/user_genres_screen.dart';
 import 'screens/3.profile/user_films_statut_screen.dart';
-import 'screens/3.profile/user_amis_screen.dart';
-import 'screens/3.profile/user_amis_demandes_screen.dart';
 import 'screens/4.autre/swipe_home.dart';
 import 'screens/4.autre/acteurs_list_screen.dart';
 import 'screens/4.autre/acteur_detail_screen.dart';
+
+
 
 import 'theme/theme.dart';
 
@@ -71,8 +71,6 @@ class MyApp extends StatelessWidget {
           '/profile': (context) => const ProfileScreen(),
           '/my-genres': (context) => const UserGenresScreen(),
           '/liked-movies': (context) => const UserFilmsStatutScreen(),
-          '/my-friends': (context) => const UserAmisScreen(),
-          '/friend-requests': (context) => const UserAmisDemandesScreen(),
           '/swipe': (context) => const SwipeHomePage(),
           '/actors': (context) => const ActeursListScreen(),
           '/admin': (context) => const AdminScreen(),

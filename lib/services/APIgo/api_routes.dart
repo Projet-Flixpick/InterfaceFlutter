@@ -1,7 +1,6 @@
 class ApiRoutes {
   static const String baseUrl = 'http://localhost:3000/api';
   static const String ProtectedUrl = '$baseUrl/protected';
-
   // Auth
   static const String login = '$baseUrl/login';
   static const String register = '$baseUrl/inscription';
@@ -22,7 +21,7 @@ class ApiRoutes {
   static const String addSeenMovie = '$ProtectedUrl/addSeenMovie';
   static const String deleteSeenMovie = '$ProtectedUrl/deleteSeenMovie';
 
-  // Amis
+ // Amis
   static const String addFriendRequest = '$ProtectedUrl/addFriendRequest';
   static const String friendRequestResponse = '$ProtectedUrl/friendRequestResponse';
   static const String getFriendRequests = '$ProtectedUrl/getFriendRequests';

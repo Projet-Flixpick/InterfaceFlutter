@@ -11,7 +11,6 @@ import '../../providers/user_provider.dart';
 import '../0.auth/login_screen.dart';
 import 'user_genres_screen.dart';
 import 'user_films_statut_screen.dart';
-import 'user_amis_screen.dart';
 import 'user_settings_screen.dart';
 
 // Nouveaux écrans Admin / Contributeur
@@ -126,6 +125,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   );
                 },
               ),
+              /*
               ListTile(
                 leading: const Icon(Icons.people),
                 title: const Text('My friends'),
@@ -138,7 +138,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                   );
                 },
-              ),
+              ), */
+
               ListTile(
                 leading: const Icon(Icons.settings),
                 title: const Text('Settings'),
