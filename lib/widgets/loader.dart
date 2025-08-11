@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 
 class AnimatedLogo extends StatefulWidget {
-  const AnimatedLogo({Key? key}) : super(key: key);
+  final TextStyle? textStyle;
+  const AnimatedLogo({Key? key, this.textStyle}) : super(key: key);
 
   @override
   State<AnimatedLogo> createState() => _AnimatedLogoState();
@@ -11,7 +12,6 @@ class _AnimatedLogoState extends State<AnimatedLogo>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _positionAnimation;
-
   int dotCount = 0;
 
   @override
@@ -27,7 +27,6 @@ class _AnimatedLogoState extends State<AnimatedLogo>
       CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
     );
 
-    // Lance l’animation des "..."
     _startDotAnimation();
   }
 
@@ -71,7 +70,7 @@ class _AnimatedLogoState extends State<AnimatedLogo>
               ),
               AnimatedBuilder(
                 animation: _positionAnimation,
-                builder: (context, child) {
+                builder: (_, __) {
                   return Positioned(
                     top: _positionAnimation.value,
                     left: 79,
@@ -89,11 +88,12 @@ class _AnimatedLogoState extends State<AnimatedLogo>
         const SizedBox(height: 20),
         Text(
           "Chargement$dots",
-          style: const TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-            color: Color(0xFFC14040),
-          ),
+          style: widget.textStyle ??
+              const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFFC14040),
+              ),
         ),
       ],
     );

@@ -13,7 +13,6 @@ import 'user_settings_screen.dart';
 import 'admin_screen.dart';
 import 'contributeur_screen.dart';
 
-
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({Key? key}) : super(key: key);
 
@@ -46,126 +45,127 @@ class _ProfileScreenState extends State<ProfileScreen> {
         final isContributor = rights == 1;
 
         return Scaffold(
-          appBar: AppBar(title: const Text('Profil')),
-          body: ListView(
-            padding: const EdgeInsets.all(16),
-            children: [
-              // --- Infos utilisateur ---
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _getRoleIcon(rights),
-                  const SizedBox(width: 12),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        _mapRights(rights),
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
+          body: _NoSelection(
+            child: ListView(
+              padding: const EdgeInsets.all(16),
+              children: [
+                // --- Infos utilisateur ---
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _getRoleIcon(rights),
+                    const SizedBox(width: 12),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          _mapRights(rights),
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                      ),
-                      Text('${userProvider.prenom} ${userProvider.nom}'),
-                      Text(
-                        userProvider.email,
-                        style: const TextStyle(color: Colors.grey),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-              const SizedBox(height: 20),
-
-              // --- Statistiques ---
-              const Text(
-                'Statistics',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 8),
-              _statRow('Liked movies', userProvider.likesCount.toString()),
-              _statRow('Watched movies', userProvider.seenCount.toString()),
-              _statRow(
-                'Genres selected',
-                userProvider.genres.length.toString(),
-              ),
-              const Divider(height: 32),
-
-              // --- Sections standard ---
-              ListTile(
-                leading: const Icon(Icons.category),
-                title: const Text('My favorite genres'),
-                trailing: const Icon(Icons.arrow_forward_ios),
-                onTap: () => Navigator.pushNamed(context, '/my-genres'),
-              ),
-              ListTile(
-                leading: const Icon(Icons.movie),
-                title: const Text('My liked / watched movies'),
-                trailing: const Icon(Icons.arrow_forward_ios),
-                onTap: () => Navigator.pushNamed(context, '/liked-movies'),
-              ),
-
-              // --- Section Amis ---
-              ListTile(
-                leading: const Icon(Icons.group),
-                title: const Text('My friends'),
-                trailing: const Icon(Icons.arrow_forward_ios),
-                onTap: () => Navigator.pushNamed(context, '/my-friends'),
-              ),
-
-              // --- Paramètres ---
-              const Divider(height: 32),
-              ListTile(
-                leading: const Icon(Icons.settings),
-                title: const Text('Settings'),
-                trailing: const Icon(Icons.arrow_forward_ios),
-                onTap: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => const UserSettingsScreen(),
-                  ),
+                        Text('${userProvider.prenom} ${userProvider.nom}'),
+                        Text(
+                          userProvider.email,
+                          style: const TextStyle(color: Colors.grey),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
-              ),
+                const SizedBox(height: 20),
 
-              // --- Espace Contributeur ---
-              if (isContributor)
+                // --- Statistiques ---
+                const Text(
+                  'Statistics',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8),
+                _statRow('Liked movies', userProvider.likesCount.toString()),
+                _statRow('Watched movies', userProvider.seenCount.toString()),
+                _statRow(
+                  'Genres selected',
+                  userProvider.genres.length.toString(),
+                ),
+                const Divider(height: 32),
+
+                // --- Sections standard ---
                 ListTile(
-                  leading: const Icon(Icons.video_library),
-                  title: const Text('Contributions'),
-                  subtitle: const Text('Espace contributeur'),
+                  leading: const Icon(Icons.category),
+                  title: const Text('My favorite genres'),
+                  trailing: const Icon(Icons.arrow_forward_ios),
+                  onTap: () => Navigator.pushNamed(context, '/my-genres'),
+                ),
+                ListTile(
+                  leading: const Icon(Icons.movie),
+                  title: const Text('My liked / watched movies'),
+                  trailing: const Icon(Icons.arrow_forward_ios),
+                  onTap: () => Navigator.pushNamed(context, '/liked-movies'),
+                ),
+
+                // --- Section Amis ---
+                ListTile(
+                  leading: const Icon(Icons.group),
+                  title: const Text('My friends'),
+                  trailing: const Icon(Icons.arrow_forward_ios),
+                  onTap: () => Navigator.pushNamed(context, '/my-friends'),
+                ),
+
+                // --- Paramètres ---
+                const Divider(height: 32),
+                ListTile(
+                  leading: const Icon(Icons.settings),
+                  title: const Text('Settings'),
                   trailing: const Icon(Icons.arrow_forward_ios),
                   onTap: () => Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => const ContributeurScreen(),
+                      builder: (_) => const UserSettingsScreen(),
                     ),
                   ),
                 ),
 
-              // --- Espace Admin ---
-              if (isAdmin)
+                // --- Espace Contributeur ---
+                if (isContributor)
+                  ListTile(
+                    leading: const Icon(Icons.video_library),
+                    title: const Text('Contributions'),
+                    subtitle: const Text('Espace contributeur'),
+                    trailing: const Icon(Icons.arrow_forward_ios),
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const ContributeurScreen(),
+                      ),
+                    ),
+                  ),
+
+                // --- Espace Admin ---
+                if (isAdmin)
+                  ListTile(
+                    leading: const Icon(Icons.admin_panel_settings),
+                    title: const Text('Administration'),
+                    subtitle:
+                        const Text('Gérer les contributions et utilisateurs'),
+                    trailing: const Icon(Icons.arrow_forward_ios),
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const AdminScreen(),
+                      ),
+                    ),
+                  ),
+
+                // --- Déconnexion ---
+                const Divider(),
                 ListTile(
-                  leading: const Icon(Icons.admin_panel_settings),
-                  title: const Text('Administration'),
-                  subtitle:
-                      const Text('Gérer les contributions et utilisateurs'),
-                  trailing: const Icon(Icons.arrow_forward_ios),
-                  onTap: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => const AdminScreen(),
-                    ),
-                  ),
+                  leading: const Icon(Icons.logout),
+                  title: const Text('Log out'),
+                  onTap: _logout,
                 ),
-
-              // --- Déconnexion ---
-              const Divider(),
-              ListTile(
-                leading: const Icon(Icons.logout),
-                title: const Text('Log out'),
-                onTap: _logout,
-              ),
-            ],
+              ],
+            ),
           ),
         );
       },
@@ -202,5 +202,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
       default:
         return const Icon(Icons.person);
     }
+  }
+}
+
+/// Widget pour bloquer la sélection de texte
+class _NoSelection extends StatelessWidget {
+  final Widget child;
+  const _NoSelection({required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      behavior: HitTestBehavior.translucent,
+      onTap: () {}, // intercepte le clic et empêche la sélection
+      child: child,
+    );
   }
 }

@@ -3,10 +3,9 @@ import 'package:flutter/material.dart';
 // Widgets
 import '../../widgets/films_list.dart';
 import '../../widgets/bottom_nav_bar.dart';
-import '../../widgets/top_screen_title.dart';
-import '../../widgets/popcorn_loader.dart';
 import '../../widgets/search_icon.dart';
 import '../../widgets/titre_section.dart';
+import '../../widgets/top_screen_title.dart';
 
 // Models
 import '../../models/film_model.dart';
@@ -22,7 +21,6 @@ import '../2.films/tops_screen.dart';
 import '../2.films/series_screen.dart';
 import '../2.films/film_detail_screen.dart';
 import '../4.autre/swipe_home.dart';
-import '../4.autre/acteurs_list_screen.dart';
 import '../4.autre/acteur_detail_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -37,10 +35,10 @@ class _HomeScreenState extends State<HomeScreen> {
 
   final List<Widget> _screens = [
     const HomeContent(),
-    TopsScreen(),
+    const TopsScreen(),
     const SeriesScreen(),
-    RecommendationsScreen(),
-    ProfileScreen(),
+    const RecommendationsScreen(),
+    const ProfileScreen(),
   ];
 
   final List<String> _titles = [
@@ -58,31 +56,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: _selectedIndex == 0
-          ? AppBar(
-              title: Text(
-                _titles[_selectedIndex],
-                style: const TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              centerTitle: true,
-              backgroundColor: Colors.redAccent,
-              foregroundColor: Colors.white,
-              elevation: 5,
-              shape: const RoundedRectangleBorder(
-                borderRadius: BorderRadius.vertical(
-                  bottom: Radius.circular(10),
-                ),
-              ),
-              bottom: const PreferredSize(
-                preferredSize: Size.fromHeight(16),
-                child: SizedBox(height: 16),
-              ),
-              automaticallyImplyLeading: false, // SUPPRIME LA FLÈCHE sur Home
-            )
-          : TopScreenTitle(title: _titles[_selectedIndex]),
+      appBar: TopScreenTitle(title: _titles[_selectedIndex]),
       body: IndexedStack(
         index: _selectedIndex,
         children: _screens,

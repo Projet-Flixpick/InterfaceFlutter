@@ -7,7 +7,7 @@ import '../1.home/home_screen.dart';
 import '../../services/synchroniser_remote2local.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/film_statut_provider.dart';
-import '../../widgets/loader.dart';
+import '../../widgets/loader.dart'; // ← contient AnimatedLogo
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({Key? key}) : super(key: key);
@@ -29,7 +29,7 @@ class _SplashScreenState extends State<SplashScreen> {
     final token = prefs.getString('jwt_token');
     print(">>> Token = $token");
 
-    await Future.delayed(const Duration(seconds: 2)); // effet de pause
+    await Future.delayed(const Duration(seconds: 2)); // petit effet de pause
 
     if (token != null && token.split('.').length == 3) {
       print("🔁 Session existante trouvée, synchronisation en cours...");
@@ -65,20 +65,12 @@ class _SplashScreenState extends State<SplashScreen> {
     return const Scaffold(
       backgroundColor: Colors.white,
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            AnimatedLogo(),
-            SizedBox(height: 32),
-            Text(
-              "Chargement...",
-              style: TextStyle(
-                color: Colors.redAccent,
-                fontWeight: FontWeight.bold,
-                fontSize: 20,
-              ),
-            ),
-          ],
+        child: AnimatedLogo(
+          textStyle: TextStyle(
+            color: Colors.redAccent,
+            fontWeight: FontWeight.bold,
+            fontSize: 20,
+          ),
         ),
       ),
     );
