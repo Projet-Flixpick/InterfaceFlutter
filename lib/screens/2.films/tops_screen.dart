@@ -47,7 +47,7 @@ class _TopsScreenState extends State<TopsScreen>
         if (isPopularLoading) return;
         setState(() => isPopularLoading = true);
         final data = await fetchPopularMovies(page: popularPage++);
-        final valid = data.where((f) => f.voteAverage != 10).toList();
+        final valid = data.where((f) => f.voteAverage != 5).toList();
         if (!mounted) return;
         setState(() {
           popularFilms.addAll(valid);
@@ -59,9 +59,9 @@ class _TopsScreenState extends State<TopsScreen>
         if (isTopLoading) return;
         setState(() => isTopLoading = true);
         List<Film> validTop = [];
-        while (validTop.isEmpty && topPage < 10) {
+        while (validTop.isEmpty && topPage < 5) {
           final data = await fetchTopMovies(page: topPage++);
-          validTop = data.where((f) => f.voteAverage != 10).toList();
+          validTop = data.where((f) => f.voteAverage != 5).toList();
         }
         if (!mounted) return;
         setState(() {

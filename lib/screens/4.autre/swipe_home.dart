@@ -17,54 +17,85 @@ class SwipeHomePage extends StatefulWidget {
 
 class _SwipeHomePageState extends State<SwipeHomePage> {
   final List<Film> _queue = [];
+  final Set<String> _seenIds = {}; // anti doublons (queue + déjà swipés)
   int _moviePage = 1;
   int _seriesPage = 1;
   bool _isLoading = false;
 
+  // seuil de confort : on essaye de garder au moins N cartes d’avance
+  static const int _bufferTarget = 8;
+  static const int _maxAttemptsPerLoad = 6; // limite pour éviter des boucles infinies
+
   @override
   void initState() {
     super.initState();
-    _loadMore(); // charge la première catégorie
+    _loadMore(minToAdd: _bufferTarget);
   }
 
-  Future<void> _loadMore() async {
+  // Filtre + anti-doublons + statut (like/dislike)
+  List<Film> _filterNew(List<Film> list) {
+    final statutProv = context.read<FilmStatutProvider>();
+    final added = <Film>[];
+    for (final f in list) {
+      final id = f.mongoId;
+      if (id.isEmpty) continue;
+      if (_seenIds.contains(id)) continue;
+      if (statutProv.isLiked(id) || statutProv.isDisliked(id)) continue;
+      _seenIds.add(id);
+      added.add(f);
+    }
+    return added;
+  }
+
+  Future<void> _loadMore({int minToAdd = 4}) async {
     if (_isLoading) return;
     setState(() => _isLoading = true);
 
-    final statutProv = Provider.of<FilmStatutProvider>(context, listen: false);
+    final added = <Film>[];
+    int attempts = 0;
 
-    // 1. Films populaires
-    final movies = await fetchPopularMovies(page: _moviePage++);
-    final moviesFiltered = movies.where((f) =>
-      !statutProv.isLiked(f.mongoId) &&
-      !statutProv.isDisliked(f.mongoId)
-    ).toList();
-    if (moviesFiltered.isNotEmpty) {
-      setState(() => _queue.addAll(moviesFiltered));
-      setState(() => _isLoading = false);
-      return;
+    // alterne films/séries et avance les pages tant qu'on n'a pas de matière
+    while (added.length < minToAdd && attempts < _maxAttemptsPerLoad) {
+      attempts++;
+
+      // priorité à la catégorie la moins parcourue pour équilibrer
+      final tryMoviesFirst = _moviePage <= _seriesPage;
+
+      if (tryMoviesFirst) {
+        // Movies
+        final movies = await fetchPopularMovies(page: _moviePage++);
+        added.addAll(_filterNew(movies));
+
+        if (added.length < minToAdd) {
+          // Series
+          final series = await fetchPopularSeries(page: _seriesPage++);
+          added.addAll(_filterNew(series));
+        }
+      } else {
+        // Series
+        final series = await fetchPopularSeries(page: _seriesPage++);
+        added.addAll(_filterNew(series));
+
+        if (added.length < minToAdd) {
+          // Movies
+          final movies = await fetchPopularMovies(page: _moviePage++);
+          added.addAll(_filterNew(movies));
+        }
+      }
     }
 
-    // 2. Séries populaires
-    final series = await fetchPopularSeries(page: _seriesPage++);
-    final seriesFiltered = series.where((f) =>
-      !statutProv.isLiked(f.mongoId) &&
-      !statutProv.isDisliked(f.mongoId)
-    ).toList();
-    if (seriesFiltered.isNotEmpty) {
-      setState(() => _queue.addAll(seriesFiltered));
-      setState(() => _isLoading = false);
-      return;
+    if (mounted) {
+      setState(() {
+        _queue.addAll(added);
+        _isLoading = false;
+      });
     }
-
-    // 3. Si aucune catégorie n'a rien
-    setState(() => _isLoading = false);
   }
 
   bool _onSwipe(int prev, int? _, CardSwiperDirection dir, List<Film> available) {
     final film   = available[prev];
-    final token  = Provider.of<AuthProvider>(context, listen: false).token;
-    final statut = Provider.of<FilmStatutProvider>(context, listen: false);
+    final token  = context.read<AuthProvider>().token;
+    final statut = context.read<FilmStatutProvider>();
 
     if (token != null) {
       if (dir == CardSwiperDirection.right) {
@@ -74,22 +105,31 @@ class _SwipeHomePageState extends State<SwipeHomePage> {
       }
     }
 
-    // Charge plus si dernière carte dispo swipée
-    if (prev >= available.length - 1) {
-      _loadMore();
+    // Précharge dès qu'il reste peu de cartes visibles
+    final remaining = available.length - 1 - prev;
+    if (remaining <= 2) {
+      _loadMore(minToAdd: _bufferTarget);
     }
     return true;
   }
 
   @override
   Widget build(BuildContext context) {
-    final statutProv = Provider.of<FilmStatutProvider>(context);
+    final statutProv = context.watch<FilmStatutProvider>();
 
-    // Filtrage à la volée (si on a déjà liké/disliké un film par le provider)
+    // Filtrage live (si like/dislike déclenché par ailleurs)
     final available = _queue.where((f) =>
       !statutProv.isLiked(f.mongoId) &&
       !statutProv.isDisliked(f.mongoId)
     ).toList();
+
+    // Si on a très peu de cartes (ex: retour d’écran), tente un préchargement
+    if (!_isLoading && available.length < (_bufferTarget ~/ 2)) {
+      // petit délai pour laisser build se finir
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _loadMore(minToAdd: _bufferTarget);
+      });
+    }
 
     return Scaffold(
       appBar: AppBar(title: const Text('Swipe Movies')),
@@ -99,23 +139,17 @@ class _SwipeHomePageState extends State<SwipeHomePage> {
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 12),
               child: Center(
-                child: RichText(
-                  text: TextSpan(
-                    children: [
-                      TextSpan(
-                        text: 'Slide left to dislike',
-                        style: TextStyle(fontSize: 16, color: Colors.red),
-                      ),
-                      TextSpan(
-                        text: '   •   ',
-                        style: TextStyle(fontSize: 16, color: Colors.grey),
-                      ),
-                      TextSpan(
-                        text: 'Slide right to like',
-                        style: TextStyle(fontSize: 16, color: Colors.green),
-                      ),
-                    ],
-                  ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: const [
+                    Icon(Icons.thumb_down, color: Colors.red),
+                    SizedBox(width: 8),
+                    Text('Slide left to dislike'),
+                    SizedBox(width: 20),
+                    Icon(Icons.thumb_up, color: Colors.green),
+                    SizedBox(width: 8),
+                    Text('Slide right to like'),
+                  ],
                 ),
               ),
             ),
@@ -133,8 +167,7 @@ class _SwipeHomePageState extends State<SwipeHomePage> {
                     cardsCount: available.length,
                     isLoop: false,
                     numberOfCardsDisplayed: 1,
-                    allowedSwipeDirection:
-                        AllowedSwipeDirection.only(left: true, right: true),
+                    allowedSwipeDirection: const AllowedSwipeDirection.only(left: true, right: true),
                     onSwipe: (i, _, dir) => _onSwipe(i, _, dir, available),
                     cardBuilder: (ctx, index, px, py) {
                       final film     = available[index];

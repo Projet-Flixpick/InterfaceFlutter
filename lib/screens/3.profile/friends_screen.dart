@@ -22,12 +22,27 @@ class _FriendsScreenState extends State<FriendsScreen>
   final TextEditingController _searchCtrl = TextEditingController();
 
   bool _sendingRequest = false;
-  bool _isValidEmail = false;
+
+  // --- Validation entrée (email OU ObjectId Mongo) ---
+  bool _isInputValid = false;
+  final RegExp _emailRegex =
+      RegExp(r'^[\w\-.+]+@([\w\-]+\.)+[\w\-]{2,}$'); // email assez tolérant
+  final RegExp _mongoRegex =
+      RegExp(r'^[a-fA-F0-9]{24}$'); // 24 hex
+
+  bool _looksLikeEmail(String v) => _emailRegex.hasMatch(v.trim());
+  bool _looksLikeMongoId(String v) => _mongoRegex.hasMatch(v.trim());
+
+  void _validateIdentifier(String value) {
+    final v = value.trim();
+    setState(() => _isInputValid = _looksLikeEmail(v) || _looksLikeMongoId(v));
+  }
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(length: 2, vsync: this)
+      ..addListener(() => setState(() {}));
     SchedulerBinding.instance.addPostFrameCallback((_) {
       final auth = context.read<AuthProvider>();
       if (auth.token != null) {
@@ -47,20 +62,19 @@ class _FriendsScreenState extends State<FriendsScreen>
     super.dispose();
   }
 
-  void _validateEmail(String value) {
-    final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
-    setState(() => _isValidEmail = emailRegex.hasMatch(value.trim()));
-  }
-
   Future<void> _sendRequest() async {
-    final email = _emailController.text.trim();
-    if (email.isEmpty) return;
+    if (_sendingRequest || !_isInputValid) return;
+
+    final identifier = _emailController.text.trim();
+    if (identifier.isEmpty) return;
 
     setState(() => _sendingRequest = true);
     final auth = context.read<AuthProvider>();
     final fp = context.read<FriendProvider>();
 
-    final error = await fp.sendFriendRequest(auth.token!, email);
+    // Back actuel : envoie l'email. Si tu ajoutes plus tard un endpoint par ID,
+    // route ici selon _looksLikeMongoId(identifier).
+    final error = await fp.sendFriendRequest(auth.token!, identifier);
     setState(() => _sendingRequest = false);
 
     if (!mounted) return;
@@ -69,7 +83,7 @@ class _FriendsScreenState extends State<FriendsScreen>
     );
     if (error == null) {
       _emailController.clear();
-      _isValidEmail = false;
+      _isInputValid = false;
       fp.fetchFriendRequests(auth.token!);
     }
   }
@@ -177,8 +191,8 @@ class _FriendsScreenState extends State<FriendsScreen>
           itemCount: items.length,
           separatorBuilder: (_, __) => const SizedBox(height: 6),
           itemBuilder: (context, i) {
-            final email = items[i];
-            final initials = _initialsFromEmail(email);
+            final friendKey = items[i]; // email OU MongoId
+            final initials = _initialsFromEmail(friendKey);
             return Card(
               elevation: 0,
               shape: RoundedRectangleBorder(
@@ -192,30 +206,21 @@ class _FriendsScreenState extends State<FriendsScreen>
                     style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                 ),
-                title: Text(email, maxLines: 1, overflow: TextOverflow.ellipsis),
+                title: Text(friendKey,
+                    maxLines: 1, overflow: TextOverflow.ellipsis),
                 subtitle: const Text('Ami'),
                 onTap: () {
-                  // NAVIGATION — push simple => retour possible
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) =>
-                          RecommendationsScreen(initialFriendId: email),
+                      builder: (_) => const RecommendationsScreen(),
                     ),
                   );
                 },
                 trailing: PopupMenuButton<String>(
                   onSelected: (v) async {
-                    if (v == 'reco') {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) =>
-                              RecommendationsScreen(initialFriendId: email),
-                        ),
-                      );
-                    } else if (v == 'delete') {
-                      await fp.deleteFriend(auth.token!, email);
+                    if (v == 'delete') {
+                      await fp.deleteFriend(auth.token!, friendKey);
                       if (context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(content: Text('Ami supprimé.')),
@@ -224,13 +229,6 @@ class _FriendsScreenState extends State<FriendsScreen>
                     }
                   },
                   itemBuilder: (_) => const [
-                    PopupMenuItem(
-                      value: 'reco',
-                      child: ListTile(
-                        leading: Icon(Icons.theaters),
-                        title: Text('Voir recommandations communes'),
-                      ),
-                    ),
                     PopupMenuItem(
                       value: 'delete',
                       child: ListTile(
@@ -326,72 +324,99 @@ class _FriendsScreenState extends State<FriendsScreen>
   }
 
   void _showAddFriendDialog() {
+    // helpers de validation (email OU id Mongo 24 hex)
+    bool looksLikeEmail(String v) =>
+        RegExp(r'^[\w\-.+]+@([\w\-]+\.)+[\w\-]{2,}$').hasMatch(v.trim());
+    bool looksLikeMongoId(String v) =>
+        RegExp(r'^[a-fA-F0-9]{24}$').hasMatch(v.trim());
+
+    String value = _emailController.text.trim();
+    bool isValid = looksLikeEmail(value) || looksLikeMongoId(value);
+
     showDialog(
       context: context,
       barrierColor: Colors.black.withOpacity(0.45),
       builder: (context) {
-        return Dialog(
-          backgroundColor: Colors.white,
-          insetPadding:
-              const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Text('Ajouter un ami',
-                    style:
-                        TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                const SizedBox(height: 16),
-                TextField(
-                  controller: _emailController,
-                  keyboardType: TextInputType.emailAddress,
-                  onChanged: _validateEmail,
-                  decoration: InputDecoration(
-                    labelText: 'Email',
-                    prefixIcon: const Icon(Icons.alternate_email),
-                    border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(14)),
-                  ),
-                ),
-                const SizedBox(height: 14),
-                Row(
+        return StatefulBuilder(
+          builder: (context, setStateDialog) {
+            return Dialog(
+              backgroundColor: Colors.white,
+              insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: const Text('Annuler'),
+                    const Text(
+                      'Ajouter un ami',
+                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                     ),
-                    const Spacer(),
-                    FilledButton.icon(
-                      onPressed: (_sendingRequest || !_isValidEmail)
-                          ? null
-                          : () async {
-                              Navigator.pop(context);
-                              await _sendRequest();
-                            },
-                      icon: _sendingRequest
-                          ? const SizedBox(
-                              width: 16,
-                              height: 16,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : const Icon(Icons.person_add),
-                      label: const Text('Envoyer'),
-                      style: FilledButton.styleFrom(
-                        backgroundColor: Colors.redAccent,
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
+                    const SizedBox(height: 16),
+                    TextField(
+                      controller: _emailController,
+                      autofocus: true,
+                      keyboardType: TextInputType.emailAddress,
+                      textInputAction: TextInputAction.send,
+                      onChanged: (v) {
+                        value = v;
+                        setStateDialog(() {
+                          isValid = looksLikeEmail(v) || looksLikeMongoId(v);
+                        });
+                      },
+                      onSubmitted: (_) async {
+                        if (!isValid || _sendingRequest) return;
+                        Navigator.pop(context);
+                        await _sendRequest();
+                      },
+                      decoration: InputDecoration(
+                        labelText: 'Email',
+                        prefixIcon: const Icon(Icons.alternate_email),
+                        border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(14),
                         ),
+                        errorText: _emailController.text.isEmpty || isValid
+                            ? null
+                            : 'Entrez un email valide',
                       ),
+                    ),
+                    const SizedBox(height: 14),
+                    Row(
+                      children: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context),
+                          child: const Text('Annuler'),
+                        ),
+                        const Spacer(),
+                        FilledButton.icon(
+                          onPressed: (_sendingRequest || !isValid)
+                              ? null
+                              : () async {
+                                  Navigator.pop(context);
+                                  await _sendRequest();
+                                },
+                          icon: _sendingRequest
+                              ? const SizedBox(
+                                  width: 16, height: 16,
+                                  child: CircularProgressIndicator(strokeWidth: 2),
+                                )
+                              : const Icon(Icons.person_add),
+                          label: const Text('Envoyer'),
+                          style: FilledButton.styleFrom(
+                            backgroundColor: Colors.redAccent,
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
-              ],
-            ),
-          ),
+              ),
+            );
+          },
         );
       },
     );

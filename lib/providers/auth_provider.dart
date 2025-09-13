@@ -16,7 +16,7 @@ class AuthProvider with ChangeNotifier {
   void setToken(String token) {
     if (token.split('.').length == 3) {
       _token = token;
-      print('🔐 Token JWT stocké dans AuthProvider : $_token');
+      print('🔐 Token JWT stocké dans AuthProvider, $token');
       notifyListeners();
     } else {
       print('❌ Tentative de stockage d’un token mal formé : $token');
