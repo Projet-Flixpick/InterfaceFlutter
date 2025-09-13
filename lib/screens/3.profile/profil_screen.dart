@@ -146,8 +146,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ListTile(
                     leading: const Icon(Icons.admin_panel_settings),
                     title: const Text('Administration'),
-                    subtitle:
-                        const Text('Gérer les contributions et utilisateurs'),
                     trailing: const Icon(Icons.arrow_forward_ios),
                     onTap: () => Navigator.push(
                       context,

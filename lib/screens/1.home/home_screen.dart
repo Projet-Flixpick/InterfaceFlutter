@@ -160,7 +160,7 @@ class _HomeContentState extends State<HomeContent> {
           child: TextField(
             controller: _searchController,
             decoration: InputDecoration(
-              hintText: 'Rechercher un film, une série, un acteur...',
+              hintText: 'Search movies, series, actors...',
               prefixIcon: const Icon(Icons.search),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(16),

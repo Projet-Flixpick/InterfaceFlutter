@@ -177,7 +177,7 @@ class _RecommendationsScreenState extends State<RecommendationsScreen>
     setState(() {
       _friendRecs.addAll(films);
       _loadingFriend = false;
-      _friendLoaded = true; // ✅ on ne rechargera plus tant que la liste vit
+      _friendLoaded = true;
     });
   }
 
@@ -211,7 +211,7 @@ class _RecommendationsScreenState extends State<RecommendationsScreen>
         child: ListView(
           key: const PageStorageKey('recommendations_page'),
           children: [
-            const TitreSection(title: 'Films recommandés pour vous'),
+            const TitreSection(title: 'Recommended Movies for You'),
             _movieRecs.isEmpty && _loadingMovies
                 ? const Padding(
                     padding: EdgeInsets.symmetric(vertical: 24),
@@ -223,7 +223,7 @@ class _RecommendationsScreenState extends State<RecommendationsScreen>
                     loadMoreFilms: _loadMovies,
                   ),
 
-            const TitreSection(title: 'Séries recommandées pour vous'),
+            const TitreSection(title: 'Recommended Series for You'),
             _seriesRecs.isEmpty && _loadingSeries
                 ? const Padding(
                     padding: EdgeInsets.symmetric(vertical: 24),
@@ -235,7 +235,7 @@ class _RecommendationsScreenState extends State<RecommendationsScreen>
                     loadMoreFilms: _loadSeries,
                   ),
 
-            const TitreSection(title: 'Recommandations avec un ami'),
+            const TitreSection(title: 'Recommendations with a friend'),
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
               child: Row(
@@ -247,7 +247,7 @@ class _RecommendationsScreenState extends State<RecommendationsScreen>
                           ? _selectedFriendId
                           : null,
                       decoration: InputDecoration(
-                        hintText: 'Sélectionnez un ami (facultatif)',
+                        hintText: 'Select a friend (optional)',
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                         contentPadding:
                             const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
@@ -268,7 +268,7 @@ class _RecommendationsScreenState extends State<RecommendationsScreen>
                         ? const SizedBox(
                             width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
                         : const Icon(Icons.theaters),
-                    label: const Text('Voir'),
+                    label: const Text('Seek'),
                     style: FilledButton.styleFrom(
                       backgroundColor: Colors.redAccent,
                       foregroundColor: Colors.white,

@@ -223,7 +223,7 @@ class _ContributeurScreenState extends State<ContributeurScreen> {
       return;
     }
     if (!_isContributor) {
-      _showSnack('Accès refusé : votre compte doit avoir le rôle contributeur.', error: true);
+      _showSnack('Access denied: your account must have contributor rights.', error: true);
       return;
     }
 
@@ -252,8 +252,8 @@ class _ContributeurScreenState extends State<ContributeurScreen> {
     } else if (resp.statusCode == 403) {
       await _checkContributorRight();
       final msg = _isContributor
-          ? 'Accès refusé (403). Votre session semble périmée. Déconnectez-vous puis reconnectez-vous.'
-          : 'Accès refusé : votre compte doit avoir le rôle contributeur.';
+          ? 'Failed to send contribution. Please try again later.'
+          : 'Access denied: your account must have contributor rights.';
       _showSnack(msg, error: true);
     } else {
       _showSnack('Failed to send : ${resp.statusCode} ${resp.body}', error: true);
@@ -380,13 +380,13 @@ class _ContributeurScreenState extends State<ContributeurScreen> {
               const SizedBox(height: 12),
 
               if (overview != null && overview.trim().isNotEmpty) ...[
-                const Text('Résumé', style: TextStyle(fontWeight: FontWeight.w600)),
+                const Text('Overview', style: TextStyle(fontWeight: FontWeight.w600)),
                 const SizedBox(height: 6),
                 Text(overview, style: const TextStyle(height: 1.35)),
                 const SizedBox(height: 14),
               ],
 
-              const Text('Informations', style: TextStyle(fontWeight: FontWeight.w600)),
+              const Text('Details', style: TextStyle(fontWeight: FontWeight.w600)),
               const SizedBox(height: 6),
               Wrap(
                 spacing: 8,
@@ -401,7 +401,7 @@ class _ContributeurScreenState extends State<ContributeurScreen> {
               const SizedBox(height: 16),
 
               if (status == 2) ...[
-                const Text('Motif du refus', style: TextStyle(fontWeight: FontWeight.w700, color: Colors.red)),
+                const Text('Reason for Rejection', style: TextStyle(fontWeight: FontWeight.w700, color: Colors.red)),
                 const SizedBox(height: 6),
                 Container(
                   width: double.infinity,
@@ -412,7 +412,7 @@ class _ContributeurScreenState extends State<ContributeurScreen> {
                     border: Border.all(color: Colors.red.withOpacity(.25)),
                   ),
                   child: SelectableText(
-                    (reason == null || reason.isEmpty) ? 'Non communiqué.' : reason,
+                    (reason == null || reason.isEmpty) ? 'Not specified' : reason,
                     style: const TextStyle(height: 1.35),
                   ),
                 ),
@@ -501,7 +501,7 @@ class _ContributeurScreenState extends State<ContributeurScreen> {
                   border: Border.all(color: Colors.red.withOpacity(.3)),
                 ),
                 child: const Text(
-                  'Vous n’avez pas le droit contributeur. Si l’admin vient de vous l’accorder, déconnectez-vous puis reconnectez-vous.',
+                    'You do not have contributor rights. If the admin just granted you access, please log out and log back in.',
                   style: TextStyle(color: Colors.red),
                 ),
               ),
