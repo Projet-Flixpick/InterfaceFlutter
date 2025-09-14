@@ -171,13 +171,13 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     child: _isLoading
                         ? const CircularProgressIndicator(color: Colors.white)
-                        : const Text("Se connecter", style: TextStyle(fontSize: 16)),
+                        : const Text("Login", style: TextStyle(fontSize: 16)),
                   ),
                   const SizedBox(height: 20),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Text("Pas encore de compte ?"),
+                      const Text("Don't have an account? "),
                       TextButton(
                         onPressed: () async {
                           final result = await Navigator.push(
@@ -191,7 +191,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             });
                           }
                         },
-                        child: const Text("Inscription"),
+                        child: const Text("Register"),
                       ),
                     ],
                   ),
