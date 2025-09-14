@@ -59,13 +59,14 @@ class FriendProvider extends ChangeNotifier {
     }
   }
 
-  /// Répond (accepter/refuser) à une demande et rafraîchit les listes.
-  Future<void> respondToRequest(
-      String token, String senderEmail, int status) async {
-    await FriendService.respondToFriendRequest(token, senderEmail, status);
-    await fetchFriendRequests(token);
-    await fetchFriends(token);
-  }
+/// Répond (accepter/refuser) à une demande et rafraîchit les listes.
+Future<void> respondToRequest(
+    String token, String otherUserId, int status) async {
+  await FriendService.respondToFriendRequest(token, otherUserId, status);
+  await fetchFriendRequests(token);
+  await fetchFriends(token);
+}
+
 
   /// Supprime un ami et rafraîchit la liste des amis.
   Future<void> deleteFriend(String token, String otherEmail) async {

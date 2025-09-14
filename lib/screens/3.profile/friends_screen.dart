@@ -23,12 +23,11 @@ class _FriendsScreenState extends State<FriendsScreen>
 
   bool _sendingRequest = false;
 
-  // --- Validation entrée (email OU ObjectId Mongo) ---
+  // Validation email OU ObjectId 24 hex
   bool _isInputValid = false;
   final RegExp _emailRegex =
-      RegExp(r'^[\w\-.+]+@([\w\-]+\.)+[\w\-]{2,}$'); // email assez tolérant
-  final RegExp _mongoRegex =
-      RegExp(r'^[a-fA-F0-9]{24}$'); // 24 hex
+      RegExp(r'^[\w\-.+]+@([\w\-]+\.)+[\w\-]{2,}$');
+  final RegExp _mongoRegex = RegExp(r'^[a-fA-F0-9]{24}$');
 
   bool _looksLikeEmail(String v) => _emailRegex.hasMatch(v.trim());
   bool _looksLikeMongoId(String v) => _mongoRegex.hasMatch(v.trim());
@@ -43,14 +42,17 @@ class _FriendsScreenState extends State<FriendsScreen>
     super.initState();
     _tabController = TabController(length: 2, vsync: this)
       ..addListener(() => setState(() {}));
+
     SchedulerBinding.instance.addPostFrameCallback((_) {
       final auth = context.read<AuthProvider>();
-      if (auth.token != null) {
+      final token = auth.token;
+      if (token != null && token.isNotEmpty) {
         final fp = context.read<FriendProvider>();
-        fp.fetchFriends(auth.token!);
-        fp.fetchFriendRequests(auth.token!);
+        fp.fetchFriends(token);
+        fp.fetchFriendRequests(token);
       }
     });
+
     _searchCtrl.addListener(() => setState(() {}));
   }
 
@@ -69,33 +71,44 @@ class _FriendsScreenState extends State<FriendsScreen>
     if (identifier.isEmpty) return;
 
     setState(() => _sendingRequest = true);
-    final auth = context.read<AuthProvider>();
-    final fp = context.read<FriendProvider>();
+    final token = context.read<AuthProvider>().token;
+    if (token == null) {
+      setState(() => _sendingRequest = false);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Session expired.')),
+      );
+      return;
+    }
 
-    // Back actuel : envoie l'email. Si tu ajoutes plus tard un endpoint par ID,
-    // route ici selon _looksLikeMongoId(identifier).
-    final error = await fp.sendFriendRequest(auth.token!, identifier);
-    setState(() => _sendingRequest = false);
+    final error =
+        await context.read<FriendProvider>().sendFriendRequest(token, identifier);
 
     if (!mounted) return;
+    setState(() => _sendingRequest = false);
+
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(error == null ? 'Demande envoyée.' : error)),
+      SnackBar(content: Text(error == null ? 'Request sent.' : error)),
     );
     if (error == null) {
       _emailController.clear();
       _isInputValid = false;
-      fp.fetchFriendRequests(auth.token!);
+      await context.read<FriendProvider>().fetchFriendRequests(token);
     }
   }
 
   Future<void> _refreshFriends() async {
-    final auth = context.read<AuthProvider>();
-    await context.read<FriendProvider>().fetchFriends(auth.token!);
+    final token = context.read<AuthProvider>().token;
+    if (token != null) {
+      await context.read<FriendProvider>().fetchFriends(token);
+    }
   }
 
   Future<void> _refreshRequests() async {
-    final auth = context.read<AuthProvider>();
-    await context.read<FriendProvider>().fetchFriendRequests(auth.token!);
+    final token = context.read<AuthProvider>().token;
+    if (token != null) {
+      await context.read<FriendProvider>().fetchFriendRequests(token);
+    }
   }
 
   @override
@@ -103,10 +116,10 @@ class _FriendsScreenState extends State<FriendsScreen>
     final theme = Theme.of(context);
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Mes amis'),
+        title: const Text('My Friends'),
         bottom: TabBar(
           controller: _tabController,
-          tabs: const [Tab(text: 'Amis'), Tab(text: 'Demandes')],
+          tabs: const [Tab(text: 'Friends'), Tab(text: 'Requests')],
         ),
       ),
       body: Column(
@@ -118,7 +131,7 @@ class _FriendsScreenState extends State<FriendsScreen>
                 controller: _searchCtrl,
                 decoration: InputDecoration(
                   prefixIcon: const Icon(Icons.search),
-                  hintText: 'Rechercher un ami…',
+                  hintText: 'Search for a friend…',
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(16),
                   ),
@@ -171,7 +184,7 @@ class _FriendsScreenState extends State<FriendsScreen>
           return const Center(child: CircularProgressIndicator());
         }
         if (fp.friendsError != null) {
-          return Center(child: Text('Erreur : ${fp.friendsError}'));
+          return Center(child: Text('Error: ${fp.friendsError}'));
         }
 
         final me = user.email;
@@ -179,11 +192,11 @@ class _FriendsScreenState extends State<FriendsScreen>
 
         final items = fp.friends
             .map((f) => f.userIdSender == me ? f.userIdInvite : f.userIdSender)
-            .where((mail) => query.isEmpty || mail.toLowerCase().contains(query))
+            .where((mail) => (mail ?? '').toLowerCase().contains(query))
             .toList();
 
         if (items.isEmpty) {
-          return const Center(child: Text('Vous n’avez pas encore d’amis.'));
+          return const Center(child: Text('You have no friends yet.'));
         }
 
         return ListView.separated(
@@ -191,7 +204,7 @@ class _FriendsScreenState extends State<FriendsScreen>
           itemCount: items.length,
           separatorBuilder: (_, __) => const SizedBox(height: 6),
           itemBuilder: (context, i) {
-            final friendKey = items[i]; // email OU MongoId
+            final friendKey = items[i] ?? 'Unknown User';
             final initials = _initialsFromEmail(friendKey);
             return Card(
               elevation: 0,
@@ -206,8 +219,7 @@ class _FriendsScreenState extends State<FriendsScreen>
                     style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                 ),
-                title: Text(friendKey,
-                    maxLines: 1, overflow: TextOverflow.ellipsis),
+                title: Text(friendKey, maxLines: 1, overflow: TextOverflow.ellipsis),
                 subtitle: const Text('Ami'),
                 onTap: () {
                   Navigator.push(
@@ -220,10 +232,12 @@ class _FriendsScreenState extends State<FriendsScreen>
                 trailing: PopupMenuButton<String>(
                   onSelected: (v) async {
                     if (v == 'delete') {
-                      await fp.deleteFriend(auth.token!, friendKey);
+                      final token = auth.token;
+                      if (token == null) return;
+                      await fp.deleteFriend(token, friendKey);
                       if (context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Ami supprimé.')),
+                          const SnackBar(content: Text('Friend removed.')),
                         );
                       }
                     }
@@ -233,7 +247,7 @@ class _FriendsScreenState extends State<FriendsScreen>
                       value: 'delete',
                       child: ListTile(
                         leading: Icon(Icons.delete_outline),
-                        title: Text('Supprimer'),
+                        title: Text('Delete Friend'),
                       ),
                     ),
                   ],
@@ -253,12 +267,12 @@ class _FriendsScreenState extends State<FriendsScreen>
           return const Center(child: CircularProgressIndicator());
         }
         if (fp.requestsError != null) {
-          return Center(child: Text('Erreur : ${fp.requestsError}'));
+          return Center(child: Text('Error: ${fp.requestsError}'));
         }
 
         final requests = fp.requests;
         if (requests.isEmpty) {
-          return const Center(child: Text('Aucune demande en attente.'));
+          return const Center(child: Text('No pending requests.'));
         }
 
         return ListView.separated(
@@ -267,6 +281,10 @@ class _FriendsScreenState extends State<FriendsScreen>
           separatorBuilder: (_, __) => const SizedBox(height: 6),
           itemBuilder: (context, i) {
             final r = requests[i];
+            final sender = (r.userIdSender?.trim().isNotEmpty ?? false)
+                ? r.userIdSender!.trim()
+                : 'Unknown User';
+
             return Card(
               elevation: 0,
               shape: RoundedRectangleBorder(
@@ -274,34 +292,35 @@ class _FriendsScreenState extends State<FriendsScreen>
               ),
               child: ListTile(
                 leading: const CircleAvatar(child: Icon(Icons.person)),
-                title: Text(r.senderEmail,
-                    maxLines: 1, overflow: TextOverflow.ellipsis),
-                subtitle: const Text('Demande reçue'),
+                title: Text(sender, maxLines: 1, overflow: TextOverflow.ellipsis),
+                subtitle: const Text('Request received'),
                 trailing: Wrap(
                   spacing: 6,
                   children: [
                     IconButton(
-                      tooltip: 'Accepter',
+                      tooltip: 'Accept',
                       icon: const Icon(Icons.check_circle, color: Colors.green),
                       onPressed: () async {
-                        await fp.respondToRequest(
-                            auth.token!, r.senderEmail, 1);
+                        final token = auth.token;
+                        if (token == null) return;
+                        await fp.respondToRequest(token, sender, 1);
                         if (context.mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Demande acceptée.')),
+                            const SnackBar(content: Text('Request accepted.')),
                           );
                         }
                       },
                     ),
                     IconButton(
-                      tooltip: 'Refuser',
+                      tooltip: 'Refuse',
                       icon: const Icon(Icons.cancel, color: Colors.red),
                       onPressed: () async {
-                        await fp.respondToRequest(
-                            auth.token!, r.senderEmail, 0);
+                        final token = auth.token;
+                        if (token == null) return;
+                        await fp.respondToRequest(token, sender, 0);
                         if (context.mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Demande refusée.')),
+                            const SnackBar(content: Text('Request refused.')),
                           );
                         }
                       },
@@ -324,7 +343,6 @@ class _FriendsScreenState extends State<FriendsScreen>
   }
 
   void _showAddFriendDialog() {
-    // helpers de validation (email OU id Mongo 24 hex)
     bool looksLikeEmail(String v) =>
         RegExp(r'^[\w\-.+]+@([\w\-]+\.)+[\w\-]{2,}$').hasMatch(v.trim());
     bool looksLikeMongoId(String v) =>
@@ -349,7 +367,7 @@ class _FriendsScreenState extends State<FriendsScreen>
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     const Text(
-                      'Ajouter un ami',
+                      'Add Friend',
                       style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 16),
@@ -363,6 +381,7 @@ class _FriendsScreenState extends State<FriendsScreen>
                         setStateDialog(() {
                           isValid = looksLikeEmail(v) || looksLikeMongoId(v);
                         });
+                        _validateIdentifier(v);
                       },
                       onSubmitted: (_) async {
                         if (!isValid || _sendingRequest) return;
@@ -370,14 +389,14 @@ class _FriendsScreenState extends State<FriendsScreen>
                         await _sendRequest();
                       },
                       decoration: InputDecoration(
-                        labelText: 'Email',
+                        labelText: 'Email or ID',
                         prefixIcon: const Icon(Icons.alternate_email),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(14),
                         ),
                         errorText: _emailController.text.isEmpty || isValid
                             ? null
-                            : 'Entrez un email valide',
+                            : 'Enter a valid email or ID',
                       ),
                     ),
                     const SizedBox(height: 14),
@@ -385,7 +404,7 @@ class _FriendsScreenState extends State<FriendsScreen>
                       children: [
                         TextButton(
                           onPressed: () => Navigator.pop(context),
-                          child: const Text('Annuler'),
+                          child: const Text('Cancel'),
                         ),
                         const Spacer(),
                         FilledButton.icon(
@@ -401,7 +420,7 @@ class _FriendsScreenState extends State<FriendsScreen>
                                   child: CircularProgressIndicator(strokeWidth: 2),
                                 )
                               : const Icon(Icons.person_add),
-                          label: const Text('Envoyer'),
+                          label: const Text('Send Request'),
                           style: FilledButton.styleFrom(
                             backgroundColor: Colors.redAccent,
                             foregroundColor: Colors.white,

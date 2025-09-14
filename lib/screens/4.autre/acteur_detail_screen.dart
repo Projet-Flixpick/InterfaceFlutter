@@ -41,7 +41,7 @@ class _ActeurDetailScreenState extends State<ActeurDetailScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Acteur'),
+        title: const Text('Actor'),
         backgroundColor: Colors.redAccent,
       ),
       body: FutureBuilder<Person>(
@@ -51,7 +51,7 @@ class _ActeurDetailScreenState extends State<ActeurDetailScreen> {
             return const Center(child: CircularProgressIndicator());
           }
           if (snap.hasError) {
-            return Center(child: Text('Erreur : ${snap.error}'));
+            return Center(child: Text('Error : ${snap.error}'));
           }
 
           final person = snap.data!;

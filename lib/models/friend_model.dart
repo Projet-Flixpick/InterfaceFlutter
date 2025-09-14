@@ -29,23 +29,28 @@ class Friend {
 
 /// Modèle pour une demande d'ami reçue.
 class FriendRequest {
-  final String senderEmail;
+  final String id;
+  final String? userIdSender;
+  final String? userIdInvite;
   final int status;
   final DateTime createdAt;
 
   FriendRequest({
-    required this.senderEmail,
+    required this.id,
+    this.userIdSender,
+    this.userIdInvite,
     required this.status,
     required this.createdAt,
   });
 
   factory FriendRequest.fromJson(Map<String, dynamic> json) {
     return FriendRequest(
-      senderEmail: json['sender_email'] as String,
-      status: json['status'] as int,
-      createdAt: DateTime.parse(
-        (json['created_at'] as String?) ?? DateTime.now().toIso8601String(),
-      ),
+      id: json['_id'] as String,
+      userIdSender: json['user_id_sender'] as String?,
+      userIdInvite: json['user_id_invite'] as String?,
+      status: json['status'] as int? ?? 0,
+      createdAt: DateTime.tryParse(json['created_at'] as String? ?? '') ??
+          DateTime.now(),
     );
   }
 }

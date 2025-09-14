@@ -17,12 +17,12 @@ class _FriendRequestScreenState extends State<FriendRequestScreen> {
   @override
   void initState() {
     super.initState();
-    // On différé le fetch après le premier build pour éviter setState durant build
+    // Différer après le 1er build
     SchedulerBinding.instance.addPostFrameCallback((_) {
-      final auth = Provider.of<AuthProvider>(context, listen: false);
-      if (auth.token != null) {
-        Provider.of<FriendProvider>(context, listen: false)
-            .fetchFriendRequests(auth.token!);
+      final auth = context.read<AuthProvider>();
+      final token = auth.token;
+      if (token != null && token.isNotEmpty) {
+        context.read<FriendProvider>().fetchFriendRequests(token);
       }
     });
   }
@@ -39,47 +39,63 @@ class _FriendRequestScreenState extends State<FriendRequestScreen> {
           if (friendProv.requestsError != null) {
             return Center(child: Text(friendProv.requestsError!));
           }
-          final requests = friendProv.requests;
-          if (requests.isEmpty) {
+
+          final reqs = friendProv.requests;
+          if (reqs.isEmpty) {
             return const Center(child: Text('Aucune demande en attente.'));
           }
-          return ListView.builder(
-            itemCount: requests.length,
+
+          return ListView.separated(
+            padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
+            itemCount: reqs.length,
+            separatorBuilder: (_, __) => const SizedBox(height: 6),
             itemBuilder: (context, i) {
-              final r = requests[i];
-              return ListTile(
-                title: Text(r.senderEmail),
-                subtitle: const Text('Vous a envoyé une demande'),
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.check, color: Colors.green),
-                      onPressed: () async {
-                        await friendProv.respondToRequest(
-                          authProv.token!,
-                          r.senderEmail,
-                          1,
-                        );
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Demande acceptée')),
-                        );
-                      },
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.close, color: Colors.red),
-                      onPressed: () async {
-                        await friendProv.respondToRequest(
-                          authProv.token!,
-                          r.senderEmail,
-                          0,
-                        );
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Demande refusée')),
-                        );
-                      },
-                    ),
-                  ],
+              final r = reqs[i];
+              final sender = (r.userIdSender?.trim().isNotEmpty ?? false)
+                  ? r.userIdSender!.trim()
+                  : 'Utilisateur inconnu';
+
+
+              return Card(
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: ListTile(
+                  leading: const CircleAvatar(child: Icon(Icons.person)),
+                  title: Text(sender, maxLines: 1, overflow: TextOverflow.ellipsis),
+                  subtitle: const Text('Vous a envoyé une demande'),
+                  trailing: Wrap(
+                    spacing: 6,
+                    children: [
+                      IconButton(
+                        tooltip: 'Accepter',
+                        icon: const Icon(Icons.check_circle, color: Colors.green),
+                        onPressed: () async {
+                          final token = authProv.token;
+                          if (token == null) return;
+                          await friendProv.respondToRequest(token, sender, 1);
+                          if (!mounted) return;
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Demande acceptée')),
+                          );
+                        },
+                      ),
+                      IconButton(
+                        tooltip: 'Refuser',
+                        icon: const Icon(Icons.cancel, color: Colors.red),
+                        onPressed: () async {
+                          final token = authProv.token;
+                          if (token == null) return;
+                          await friendProv.respondToRequest(token, sender, 0);
+                          if (!mounted) return;
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Demande refusée')),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
                 ),
               );
             },

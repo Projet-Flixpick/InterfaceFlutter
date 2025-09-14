@@ -129,7 +129,7 @@ class Cast {
     return Cast(
       mongoId: json['_id'] as String? ?? '',
       id: id,
-      name: json['name'] as String? ?? 'Acteur inconnu',
+      name: json['name'] as String? ?? 'Unknown Name',
       character: json['character'] as String? ?? '',
       profilePath: json['profile_path'] as String?,
     );
